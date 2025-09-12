@@ -1,0 +1,28 @@
+﻿@page "/login"
+
+<div class="login-container">
+    <h3>Iniciar sesión</h3>
+
+    <div>
+        <label>Usuario</label>
+        <input @bind="username" class="form-control" />
+    </div>
+
+    <div>
+        <label>Contraseña</label>
+        <input @bind="password" type="password" class="form-control" />
+    </div>
+
+    <button class="btn btn-primary" @onclick="LoginUsu">Entrar</button>
+</div>
+
+@code {
+    private string username;
+    private string password;
+
+    private void LoginUsu()
+    {
+        Console.WriteLine($"Usuario: {username}, Contraseña: {password}");
+        
+    }
+}
