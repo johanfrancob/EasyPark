@@ -1,15 +1,17 @@
+﻿using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// 1. Configuración de servicios (Inyección de dependencias)
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configuración de la conexión a la BD
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 2. Middleware (pipeline de la app)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
