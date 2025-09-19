@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyPark.Backend", "EasyPar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyPark.Frontend", "EasyPark.Frontend\EasyPark.Frontend.csproj", "{3253A3EC-A8E9-4B13-82DC-A2261F358F38}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyPark.Shared", "EasyPark.Shared\EasyPark.Shared.csproj", "{EC45DC7C-4DC3-4FA5-B746-1B085BCCECEA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{3253A3EC-A8E9-4B13-82DC-A2261F358F38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3253A3EC-A8E9-4B13-82DC-A2261F358F38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3253A3EC-A8E9-4B13-82DC-A2261F358F38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC45DC7C-4DC3-4FA5-B746-1B085BCCECEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC45DC7C-4DC3-4FA5-B746-1B085BCCECEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC45DC7C-4DC3-4FA5-B746-1B085BCCECEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC45DC7C-4DC3-4FA5-B746-1B085BCCECEA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
