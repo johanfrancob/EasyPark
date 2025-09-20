@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace EasyPark.Shared.Entities;
 
-public class TblBahium
+public partial class TblBahium
 {
     public int IdBahia { get; set; }
 

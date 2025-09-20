@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace EasyPark.Shared.Entities;
-public class TblVehiculo
+public partial class TblVehiculo
 {
     public string Placa { get; set; } = null!;
 

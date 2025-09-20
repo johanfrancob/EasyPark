@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace EasyPark.Shared.Entities;
-public class TblFactura
+public partial class TblFactura
 {
 
     [JsonIgnore]

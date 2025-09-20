@@ -5,13 +5,13 @@ using EasyPark.Shared.Entities;
 
 namespace EasyPark.Backend;
 
-public partial class DbEasyparkContext : DbContext
+public partial class DataContext : DbContext
 {
-    public DbEasyparkContext()
+    public DataContext()
     {
     }
 
-    public DbEasyparkContext(DbContextOptions<DbEasyparkContext> options)
+    public DataContext(DbContextOptions<DataContext> options)
         : base(options)
     {
     }

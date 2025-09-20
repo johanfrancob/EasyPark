@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace EasyPark.Shared.Entities;
-public class TblTarifa
+public partial class TblTarifa
 {
     public int IdTarifa { get; set; }
 
