@@ -8,9 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.20" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.19" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.19" PrivateAssets="all" />
     <PackageReference Include="MudBlazor" Version="8.12.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EasyPark.Shared\EasyPark.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

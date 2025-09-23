@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EasyPark.Backend.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250920002250_seedbUpdate")]
-    partial class seedbUpdate
+    [Migration("20250923191825_seed3")]
+    partial class seed3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

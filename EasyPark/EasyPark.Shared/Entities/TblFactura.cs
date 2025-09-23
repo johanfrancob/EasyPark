@@ -21,9 +21,14 @@ public partial class TblFactura
 
     public string Estado { get; set; } = null!;
 
+    [JsonIgnore]
+
     public virtual TblEmpleado IdEmpleadoNavigation { get; set; } = null!;
+    [JsonIgnore]
+
 
     public virtual TblTarifa IdTarifaNavigation { get; set; } = null!;
+    [JsonIgnore]
 
     public virtual TblTicketEntradum IdTicketNavigation { get; set; } = null!;
 }

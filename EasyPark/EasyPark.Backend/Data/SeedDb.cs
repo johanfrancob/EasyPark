@@ -1,5 +1,6 @@
-﻿using EasyPark.Backend; // tu namespace Backend
-using EasyPark.Shared.Entities; // si tus entidades están aquí
+﻿using EasyPark.Backend;
+using EasyPark.Shared.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace EasyPark.Backend.Data
@@ -7,10 +8,12 @@ namespace EasyPark.Backend.Data
     public class SeedDb
     {
         private readonly DataContext _context;
+        private readonly PasswordHasher<TblUsuario> _hasher;
 
         public SeedDb(DataContext context)
         {
             _context = context;
+            _hasher = new PasswordHasher<TblUsuario>();
         }
 
         public async Task SeedAsync()
@@ -27,9 +30,10 @@ namespace EasyPark.Backend.Data
         {
             if (!_context.TblRols.Any())
             {
-                _context.TblRols.Add(new TblRol { Nombre = "Administrador" });
-                _context.TblRols.Add(new TblRol { Nombre = "Cajero" });
-                _context.TblRols.Add(new TblRol { Nombre = "Vigilante" });
+                _context.TblRols.AddRange(
+                    new TblRol { Nombre = "Administrador" },
+                    new TblRol { Nombre = "Cajero" }
+                );
 
                 await _context.SaveChangesAsync();
             }
@@ -39,33 +43,14 @@ namespace EasyPark.Backend.Data
         {
             if (!_context.TblEmpleados.Any())
             {
-                var adminRol = await _context.TblRols.FirstOrDefaultAsync(r => r.Nombre == "Administrador");
-                var cajeroRol = await _context.TblRols.FirstOrDefaultAsync(r => r.Nombre == "Cajero");
-                var vigilanteRol = await _context.TblRols.FirstOrDefaultAsync(r => r.Nombre == "Vigilante");
+                var adminRol = await _context.TblRols.FirstAsync(r => r.Nombre == "Administrador");
+                var cajeroRol = await _context.TblRols.FirstAsync(r => r.Nombre == "Cajero");
 
-                _context.TblEmpleados.Add(new TblEmpleado
-                {
-                    Nombre = "Juan Pérez",
-                    Documento = "1001",
-                    Telefono = "3001234567",
-                    IdRol = adminRol.IdRol
-                });
+                _context.TblEmpleados.AddRange(
+                    new TblEmpleado { Nombre = "Juan Pérez", Documento = "1001", Telefono = "3001234567", IdRol = adminRol.IdRol },
+                    new TblEmpleado { Nombre = "Ana Gómez", Documento = "1002", Telefono = "3109876543", IdRol = cajeroRol.IdRol }
 
-                _context.TblEmpleados.Add(new TblEmpleado
-                {
-                    Nombre = "Ana Gómez",
-                    Documento = "1002",
-                    Telefono = "3109876543",
-                    IdRol = cajeroRol.IdRol
-                });
-
-                _context.TblEmpleados.Add(new TblEmpleado
-                {
-                    Nombre = "Luis Torres",
-                    Documento = "1003",
-                    Telefono = "3115554321",
-                    IdRol = vigilanteRol.IdRol
-                });
+                );
 
                 await _context.SaveChangesAsync();
             }
@@ -75,33 +60,18 @@ namespace EasyPark.Backend.Data
         {
             if (!_context.TblUsuarios.Any())
             {
-                var admin = await _context.TblEmpleados.FirstOrDefaultAsync(e => e.Documento == "1001");
-                var cajero = await _context.TblEmpleados.FirstOrDefaultAsync(e => e.Documento == "1002");
-                var vigilante = await _context.TblEmpleados.FirstOrDefaultAsync(e => e.Documento == "1003");
+                var admin = await _context.TblEmpleados.FirstAsync(e => e.Documento == "1001");
+                var cajero = await _context.TblEmpleados.FirstAsync(e => e.Documento == "1002");
 
-                _context.TblUsuarios.Add(new TblUsuario
-                {
-                    Nombre = "admin",
-                    Contrasena = "admin123", // ⚠️ en la práctica deberías usar hash
-                    IdEmpleado = admin.IdEmpleado,
-                    Estado = "Activo"
-                });
+                var u1 = new TblUsuario { Nombre = "admin", IdEmpleado = admin.IdEmpleado, Estado = "Activo" };
+                u1.Contrasena = _hasher.HashPassword(u1, "admin123");
 
-                _context.TblUsuarios.Add(new TblUsuario
-                {
-                    Nombre = "cajero1",
-                    Contrasena = "cajero123",
-                    IdEmpleado = cajero.IdEmpleado,
-                    Estado = "Activo"
-                });
+                var u2 = new TblUsuario { Nombre = "cajero1", IdEmpleado = cajero.IdEmpleado, Estado = "Activo" };
+                u2.Contrasena = _hasher.HashPassword(u2, "cajero123");
 
-                _context.TblUsuarios.Add(new TblUsuario
-                {
-                    Nombre = "vigilante1",
-                    Contrasena = "vigilante123",
-                    IdEmpleado = vigilante.IdEmpleado,
-                    Estado = "Activo"
-                });
+              
+
+                _context.TblUsuarios.AddRange(u1, u2);
 
                 await _context.SaveChangesAsync();
             }
@@ -111,9 +81,11 @@ namespace EasyPark.Backend.Data
         {
             if (!_context.TblTarifas.Any())
             {
-                _context.TblTarifas.Add(new TblTarifa { TipoVehiculo = "Carro", ValorHora = 2500 });
-                _context.TblTarifas.Add(new TblTarifa { TipoVehiculo = "Moto", ValorHora = 1500 });
-                _context.TblTarifas.Add(new TblTarifa { TipoVehiculo = "Bicicleta", ValorHora = 500 });
+                _context.TblTarifas.AddRange(
+                    new TblTarifa { TipoVehiculo = "Carro", ValorHora = 2500 },
+                    new TblTarifa { TipoVehiculo = "Moto", ValorHora = 1500 },
+                    new TblTarifa { TipoVehiculo = "Bicicleta", ValorHora = 500 }
+                );
 
                 await _context.SaveChangesAsync();
             }

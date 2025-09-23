@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace EasyPark.Shared.Entities;
 public partial class TblTicketEntradum
@@ -14,11 +15,18 @@ public partial class TblTicketEntradum
 
     public int IdBahia { get; set; }
 
+    [JsonIgnore]
     public virtual TblBahium IdBahiaNavigation { get; set; } = null!;
+
+    [JsonIgnore]
 
     public virtual TblCliente IdClienteNavigation { get; set; } = null!;
 
+    [JsonIgnore]
+
     public virtual TblVehiculo PlacaNavigation { get; set; } = null!;
+
+    [JsonIgnore]
 
     public virtual ICollection<TblFactura> TblFacturas { get; set; } = new List<TblFactura>();
 }

@@ -1,34 +1,81 @@
 ﻿using EasyPark.Backend;
 using EasyPark.Backend.Data;
+using EasyPark.Frontend.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configuración de servicios (Inyección de dependencias)
+// ==========================
+// 1. Servicios
+// ==========================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configuración de la conexión a la BD
-builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer("name=LocalConnection")); //Para configurar la conexión a la base de datos, se puede cambiar "LocalConnection" por el nombre de la cadena de conexión de appsettings.json
+// Conexion a la BD
+builder.Services.AddDbContext<DataContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection")));
+
+// Seeder
 builder.Services.AddTransient<SeedDb>();
+
+// ==========================
+// 2. Configuración JWT
+// ==========================
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "ClaveSuperSecreta123456"; // fallback
+var key = Encoding.UTF8.GetBytes(jwtKey);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false; // solo para desarrollo
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+});
+builder.Services.AddAuthorization();
+
+// ==========================
+// 3. Configuración de CORS
+// ==========================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+// ==========================
+// 4. Construcción de la app
+// ==========================
 var app = builder.Build();
 
-
-SeedData(app);
-
-void SeedData(WebApplication app)
+// Ejecutar Seeder al inicio
+using (var scope = app.Services.CreateScope())
 {
-    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
-
-    using (var scope = scopedFactory!.CreateScope())
-    {
-        var service = scope.ServiceProvider.GetService<SeedDb>();
-        service!.SeedAsync().Wait();
-    }
+    var seeder = scope.ServiceProvider.GetRequiredService<SeedDb>();
+    await seeder.SeedAsync();
 }
 
-// 2. Middleware (pipeline de la app)
+// ==========================
+// 5. Middleware
+// ==========================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -37,6 +84,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Activar CORS globalmente
+app.UseCors("AllowAll");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

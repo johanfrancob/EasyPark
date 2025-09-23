@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace EasyPark.Shared.Entities;
 public partial class  TblEmpleado
@@ -15,8 +16,11 @@ public partial class  TblEmpleado
     public int IdRol { get; set; }
 
     public virtual TblRol IdRolNavigation { get; set; } = null!;
+    [JsonIgnore]
+
 
     public virtual ICollection<TblFactura> TblFacturas { get; set; } = new List<TblFactura>();
+    [JsonIgnore]
 
     public virtual ICollection<TblUsuario> TblUsuarios { get; set; } = new List<TblUsuario>();
 }

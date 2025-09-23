@@ -1,42 +1,55 @@
-﻿@page "/login"
-@using System.Text.RegularExpressions
-@using System.ComponentModel.DataAnnotations
+﻿@page "/"
+@using EasyPark.Frontend.Services
+@inject AuthService AuthService
+@inject NavigationManager Navigation
 
-<MudGrid Justify="Justify.Center" style="height:-50vh; padding-top:100px">
+<MudGrid Justify="Justify.Center"
+         style="height:100vh;
+                background-image:url('/Pictures/banner.jpg');
+                background-size:cover;
+                background-position:center;
+                background-repeat:no-repeat;">
     <MudItem xs="12" sm="7" md="4">
         <MudPaper Class="pa-4">
-            <MudForm>
-                <div class="d-flex justify-center mb-4">
-                    <MudImage Src="Pictures/logo.jpg" Width="190" Height="177" />
-                </div>
-            </MudForm>
             <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
-                <MudTextField T="string" Label="Usuario"  RequiredError="El usuario es obligatorio!" />
-           
-                <MudTextField T="string" Label="Contraseña" RequiredError="La contraseña es obligatoria!" 
-                              InputType="InputType.Password" />
-                              
+                <div class="d-flex justify-center mb-4">
+                    <MudImage Src="/Pictures/logo.jpg" Width="190" Height="177" />
+                </div>
+
+                <MudTextField @bind-Value="usuario" T="string" Label="Usuario" Required="true" RequiredError="El usuario es obligatorio!" />
+                <MudTextField @bind-Value="contrasena" T="string" Label="Contraseña" Required="true" RequiredError="La contraseña es obligatoria!" InputType="InputType.Password" />
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoginAsync" Class="mt-4">Ingresar</MudButton>
             </MudForm>
 
-            <MudItem Class="mt-4">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Ingresar</MudButton>
-            </MudItem>
+            <MudText Color="Color.Error">@mensaje</MudText>
         </MudPaper>
     </MudItem>
-
 </MudGrid>
-@code {
-    bool success;
-    string[] errors = { };
-    MudForm form;
 
-    private IEnumerable<string> PasswordStrength(string pw)
+@code {
+    private MudForm? form;
+    private bool success;
+    private string[] errors = { };
+    private string usuario = string.Empty;
+    private string contrasena = string.Empty;
+    private string mensaje = string.Empty;
+
+    private async Task LoginAsync()
     {
-        if (string.IsNullOrWhiteSpace(pw))
+        await form!.Validate();
+
+        if (success)
         {
-            yield return "Password is required!";
-            yield break;
+            var ok = await AuthService.LoginAsync(usuario, contrasena);
+            if (ok)
+            {
+                Navigation.NavigateTo("/home");
+            }
+            else
+            {
+                mensaje = "Usuario o contraseña incorrectos.";
+            }
         }
     }
-
 }

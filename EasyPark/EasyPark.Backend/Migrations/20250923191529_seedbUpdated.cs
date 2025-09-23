@@ -5,7 +5,7 @@
 namespace EasyPark.Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class seedbUpdate : Migration
+    public partial class seedbUpdated : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

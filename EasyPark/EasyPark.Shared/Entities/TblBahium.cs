@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace EasyPark.Shared.Entities;
 
@@ -10,6 +11,9 @@ public partial class TblBahium
     public string Estado { get; set; } = null!;
 
     public string? Ubicacion { get; set; }
+
+    [JsonIgnore]
+
 
     public virtual ICollection<TblTicketEntradum> TblTicketEntrada { get; set; } = new List<TblTicketEntradum>();
 }
