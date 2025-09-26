@@ -6,6 +6,7 @@ namespace EasyPark.Shared.Entities;
 
 public partial class TblFactura
 {
+
     public int IdFactura { get; set; }
 
     public DateTime FechaHoraSalida { get; set; }

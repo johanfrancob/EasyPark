@@ -6,6 +6,7 @@ namespace EasyPark.Shared.Entities;
 
 public partial class TblBahium
 {
+
     public int IdBahia { get; set; }
 
     public string Estado { get; set; } = null!;

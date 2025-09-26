@@ -112,15 +112,34 @@ namespace EasyPark.Backend.Data
                 var carro = await _context.TblTipoVehiculos.FirstAsync(tv => tv.Nombre == "Carro");
                 var moto = await _context.TblTipoVehiculos.FirstAsync(tv => tv.Nombre == "Moto");
 
-                _context.TblBahia.AddRange(
-                    new TblBahium { Estado = "Libre", IdTipoVehiculo = carro.IdTipoVehiculo },
-                    new TblBahium { Estado = "Libre", IdTipoVehiculo = carro.IdTipoVehiculo },
-                    new TblBahium { Estado = "Libre", IdTipoVehiculo = moto.IdTipoVehiculo }
-                );
+                var bahias = new List<TblBahium>();
 
+                for (int i = 1; i <= 10; i++)
+                {
+                    bahias.Add(new TblBahium
+                    {
+                        Estado = "Libre",
+                        IdTipoVehiculo = carro.IdTipoVehiculo,
+                        Ubicacion = $"C{i}"   
+                    });
+                }
+
+               
+                for (int i = 1; i <= 5; i++)
+                {
+                    bahias.Add(new TblBahium
+                    {
+                        Estado = "Libre",
+                        IdTipoVehiculo = moto.IdTipoVehiculo,
+                        Ubicacion = $"M{i}"   
+                    });
+                }
+
+                _context.TblBahia.AddRange(bahias);
                 await _context.SaveChangesAsync();
             }
         }
+
 
     }
 }
