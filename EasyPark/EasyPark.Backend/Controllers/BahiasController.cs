@@ -21,44 +21,40 @@ namespace EasyPark.Backend.Controllers
         public async Task<ActionResult<object>> GetResumenBahias()
         {
             var resumen = await _context.TblBahia
-                .GroupBy(b => new { b.IdTipoVehiculo, b.Estado })
+                .GroupBy(b => b.IdTipoVehiculo)
                 .Select(g => new
                 {
-                    g.Key.IdTipoVehiculo,
-                    g.Key.Estado,
-                    Total = g.Count()
+                    IdTipoVehiculo = g.Key,
+                    Total = g.Count(),
+                    Disponibles = g.Count(b => b.Estado == "Disponible")
                 })
                 .ToListAsync();
 
             int bh_disponibles_carro = 0;
-            int bh_ocupadas_carro = 0;
+            int bh_total_carro = 0;
             int bh_disponibles_moto = 0;
-            int bh_ocupadas_moto = 0;
+            int bh_total_moto = 0;
 
             foreach (var item in resumen)
             {
                 if (item.IdTipoVehiculo == 1)
                 {
-                    if (item.Estado == "Disponible")
-                        bh_disponibles_carro = item.Total;
-                    else if (item.Estado == "Ocupada")
-                        bh_ocupadas_carro = item.Total;
+                    bh_disponibles_carro = item.Disponibles;
+                    bh_total_carro = item.Total;
                 }
                 else if (item.IdTipoVehiculo == 2)
                 {
-                    if (item.Estado == "Disponible")
-                        bh_disponibles_moto = item.Total;
-                    else if (item.Estado == "Ocupada")
-                        bh_ocupadas_moto = item.Total;
+                    bh_disponibles_moto = item.Disponibles;
+                    bh_total_moto = item.Total;
                 }
             }
 
             return Ok(new
             {
                 bh_disponibles_carro,
-                bh_ocupadas_carro,
+                bh_total_carro,
                 bh_disponibles_moto,
-                bh_ocupadas_moto
+                bh_total_moto
             });
         }
 
