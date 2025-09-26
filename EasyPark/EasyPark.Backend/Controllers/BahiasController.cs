@@ -17,6 +17,51 @@ namespace EasyPark.Backend.Controllers
         public async Task<ActionResult<IEnumerable<TblBahium>>> Get() =>
             await _context.TblBahia.ToListAsync();
 
+        [HttpGet("resumen")]
+        public async Task<ActionResult<object>> GetResumenBahias()
+        {
+            var resumen = await _context.TblBahia
+                .GroupBy(b => new { b.IdTipoVehiculo, b.Estado })
+                .Select(g => new
+                {
+                    g.Key.IdTipoVehiculo,
+                    g.Key.Estado,
+                    Total = g.Count()
+                })
+                .ToListAsync();
+
+            int bh_disponibles_carro = 0;
+            int bh_ocupadas_carro = 0;
+            int bh_disponibles_moto = 0;
+            int bh_ocupadas_moto = 0;
+
+            foreach (var item in resumen)
+            {
+                if (item.IdTipoVehiculo == 1)
+                {
+                    if (item.Estado == "Disponible")
+                        bh_disponibles_carro = item.Total;
+                    else if (item.Estado == "Ocupada")
+                        bh_ocupadas_carro = item.Total;
+                }
+                else if (item.IdTipoVehiculo == 2)
+                {
+                    if (item.Estado == "Disponible")
+                        bh_disponibles_moto = item.Total;
+                    else if (item.Estado == "Ocupada")
+                        bh_ocupadas_moto = item.Total;
+                }
+            }
+
+            return Ok(new
+            {
+                bh_disponibles_carro,
+                bh_ocupadas_carro,
+                bh_disponibles_moto,
+                bh_ocupadas_moto
+            });
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<TblBahium>> Get(int id)
         {

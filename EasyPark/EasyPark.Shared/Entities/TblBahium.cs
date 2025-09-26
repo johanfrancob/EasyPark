@@ -16,7 +16,7 @@ public partial class TblBahium
     public int IdTipoVehiculo { get; set; }
 
     [JsonIgnore]
-    public virtual TblTipoVehiculo IdTipoVehiculoNavigation { get; set; } = null!;
+    public virtual TblTipoVehiculo? IdTipoVehiculoNavigation { get; set; }
     [JsonIgnore]
     public virtual ICollection<TblTicketEntradum> TblTicketEntrada { get; set; } = new List<TblTicketEntradum>();
 }
