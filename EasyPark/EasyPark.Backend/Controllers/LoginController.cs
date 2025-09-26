@@ -1,4 +1,4 @@
-﻿using EasyPark.Backend;
+﻿using EasyPark.Backend.Data;
 using EasyPark.Shared.DTOs;
 using EasyPark.Shared.Entities;
 using Microsoft.AspNetCore.Identity;

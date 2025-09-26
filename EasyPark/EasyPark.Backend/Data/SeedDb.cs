@@ -1,5 +1,4 @@
-﻿using EasyPark.Backend;
-using EasyPark.Shared.Entities;
+﻿using EasyPark.Shared.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,7 +22,10 @@ namespace EasyPark.Backend.Data
             await CheckRolesAsync();
             await CheckEmpleadosAsync();
             await CheckUsuariosAsync();
+            await CheckTipoVehiculosAsync();
             await CheckTarifasAsync();
+            await CheckBahiasAsync();
+
         }
 
         private async Task CheckRolesAsync()
@@ -69,10 +71,20 @@ namespace EasyPark.Backend.Data
                 var u2 = new TblUsuario { Nombre = "cajero1", IdEmpleado = cajero.IdEmpleado, Estado = "Activo" };
                 u2.Contrasena = _hasher.HashPassword(u2, "cajero123");
 
-              
-
                 _context.TblUsuarios.AddRange(u1, u2);
 
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task CheckTipoVehiculosAsync()
+        {
+            if (!_context.TblTipoVehiculos.Any())
+            {
+                _context.TblTipoVehiculos.AddRange(
+                    new TblTipoVehiculo { Nombre = "Carro" },
+                    new TblTipoVehiculo { Nombre = "Moto" }
+                );
                 await _context.SaveChangesAsync();
             }
         }
@@ -81,14 +93,34 @@ namespace EasyPark.Backend.Data
         {
             if (!_context.TblTarifas.Any())
             {
+                var carro = await _context.TblTipoVehiculos.FirstAsync(tv => tv.Nombre == "Carro");
+                var moto = await _context.TblTipoVehiculos.FirstAsync(tv => tv.Nombre == "Moto");
+
                 _context.TblTarifas.AddRange(
-                    new TblTarifa { TipoVehiculo = "Carro", ValorHora = 2500 },
-                    new TblTarifa { TipoVehiculo = "Moto", ValorHora = 1500 },
-                    new TblTarifa { TipoVehiculo = "Bicicleta", ValorHora = 500 }
+                    new TblTarifa { IdTipoVehiculo = carro.IdTipoVehiculo, ValorHora = 2500 }, // Carro
+                    new TblTarifa { IdTipoVehiculo = moto.IdTipoVehiculo, ValorHora = 1500 }   // Moto
                 );
 
                 await _context.SaveChangesAsync();
             }
         }
+
+        private async Task CheckBahiasAsync()
+        {
+            if (!_context.TblBahia.Any())
+            {
+                var carro = await _context.TblTipoVehiculos.FirstAsync(tv => tv.Nombre == "Carro");
+                var moto = await _context.TblTipoVehiculos.FirstAsync(tv => tv.Nombre == "Moto");
+
+                _context.TblBahia.AddRange(
+                    new TblBahium { Estado = "Libre", IdTipoVehiculo = carro.IdTipoVehiculo },
+                    new TblBahium { Estado = "Libre", IdTipoVehiculo = carro.IdTipoVehiculo },
+                    new TblBahium { Estado = "Libre", IdTipoVehiculo = moto.IdTipoVehiculo }
+                );
+
+                await _context.SaveChangesAsync();
+            }
+        }
+
     }
 }

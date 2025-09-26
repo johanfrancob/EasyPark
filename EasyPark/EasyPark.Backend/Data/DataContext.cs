@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using EasyPark.Shared.Entities;
 
-namespace EasyPark.Backend;
+namespace EasyPark.Backend.Data;
 
 public partial class DataContext : DbContext
 {
@@ -30,6 +30,8 @@ public partial class DataContext : DbContext
 
     public virtual DbSet<TblTicketEntradum> TblTicketEntrada { get; set; }
 
+    public virtual DbSet<TblTipoVehiculo> TblTipoVehiculos { get; set; }
+
     public virtual DbSet<TblUsuario> TblUsuarios { get; set; }
 
     public virtual DbSet<TblVehiculo> TblVehiculos { get; set; }
@@ -41,26 +43,33 @@ public partial class DataContext : DbContext
     {
         modelBuilder.Entity<TblBahium>(entity =>
         {
-            entity.HasKey(e => e.IdBahia).HasName("PK__tblBahia__D875E6625E3EDF4F");
+            entity.HasKey(e => e.IdBahia).HasName("PK__tblBahia__D875E662473A726D");
 
             entity.ToTable("tblBahia");
 
             entity.Property(e => e.IdBahia).HasColumnName("idBahia");
             entity.Property(e => e.Estado)
                 .HasMaxLength(20)
+                .IsUnicode(false)
                 .HasColumnName("estado");
+            entity.Property(e => e.IdTipoVehiculo).HasColumnName("idTipoVehiculo");
             entity.Property(e => e.Ubicacion)
                 .HasMaxLength(50)
                 .HasColumnName("ubicacion");
+
+            entity.HasOne(d => d.IdTipoVehiculoNavigation).WithMany(p => p.TblBahia)
+                .HasForeignKey(d => d.IdTipoVehiculo)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Bahia_Tipo");
         });
 
         modelBuilder.Entity<TblCliente>(entity =>
         {
-            entity.HasKey(e => e.IdCliente).HasName("PK__tblClien__885457EE33DA3B55");
+            entity.HasKey(e => e.IdCliente).HasName("PK__tblClien__885457EED54D88BF");
 
             entity.ToTable("tblCliente");
 
-            entity.HasIndex(e => e.Documento, "UQ__tblClien__A25B3E61B505D38F").IsUnique();
+            entity.HasIndex(e => e.Documento, "UQ__tblClien__A25B3E61CB77FCBD").IsUnique();
 
             entity.Property(e => e.IdCliente).HasColumnName("idCliente");
             entity.Property(e => e.Documento)
@@ -76,11 +85,11 @@ public partial class DataContext : DbContext
 
         modelBuilder.Entity<TblEmpleado>(entity =>
         {
-            entity.HasKey(e => e.IdEmpleado).HasName("PK__tblEmple__5295297C29D6629A");
+            entity.HasKey(e => e.IdEmpleado).HasName("PK__tblEmple__5295297C75A101A7");
 
             entity.ToTable("tblEmpleado");
 
-            entity.HasIndex(e => e.Documento, "UQ__tblEmple__A25B3E61B90254FB").IsUnique();
+            entity.HasIndex(e => e.Documento, "UQ__tblEmple__A25B3E61E2847EB6").IsUnique();
 
             entity.Property(e => e.IdEmpleado).HasColumnName("idEmpleado");
             entity.Property(e => e.Documento)
@@ -102,7 +111,7 @@ public partial class DataContext : DbContext
 
         modelBuilder.Entity<TblFactura>(entity =>
         {
-            entity.HasKey(e => e.IdFactura).HasName("PK__tblFactu__3CD5687E48370FA5");
+            entity.HasKey(e => e.IdFactura).HasName("PK__tblFactu__3CD5687EC8140890");
 
             entity.ToTable("tblFactura");
 
@@ -138,7 +147,7 @@ public partial class DataContext : DbContext
 
         modelBuilder.Entity<TblRol>(entity =>
         {
-            entity.HasKey(e => e.IdRol).HasName("PK__tblRol__3C872F76CDB91D2A");
+            entity.HasKey(e => e.IdRol).HasName("PK__tblRol__3C872F763E176C2C");
 
             entity.ToTable("tblRol");
 
@@ -150,22 +159,25 @@ public partial class DataContext : DbContext
 
         modelBuilder.Entity<TblTarifa>(entity =>
         {
-            entity.HasKey(e => e.IdTarifa).HasName("PK__tblTarif__550711E148F6FA3D");
+            entity.HasKey(e => e.IdTarifa).HasName("PK__tblTarif__550711E1484930E6");
 
             entity.ToTable("tblTarifa");
 
             entity.Property(e => e.IdTarifa).HasColumnName("idTarifa");
-            entity.Property(e => e.TipoVehiculo)
-                .HasMaxLength(50)
-                .HasColumnName("tipoVehiculo");
+            entity.Property(e => e.IdTipoVehiculo).HasColumnName("idTipoVehiculo");
             entity.Property(e => e.ValorHora)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("valorHora");
+
+            entity.HasOne(d => d.IdTipoVehiculoNavigation).WithMany(p => p.TblTarifas)
+                .HasForeignKey(d => d.IdTipoVehiculo)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Tarifa_Tipo");
         });
 
         modelBuilder.Entity<TblTicketEntradum>(entity =>
         {
-            entity.HasKey(e => e.IdTicket).HasName("PK__tblTicke__22B1456F07AC3333");
+            entity.HasKey(e => e.IdTicket).HasName("PK__tblTicke__22B1456FAB399D60");
 
             entity.ToTable("tblTicketEntrada");
 
@@ -196,9 +208,23 @@ public partial class DataContext : DbContext
                 .HasConstraintName("FK_Ticket_Vehiculo");
         });
 
+        modelBuilder.Entity<TblTipoVehiculo>(entity =>
+        {
+            entity.HasKey(e => e.IdTipoVehiculo).HasName("PK__tblTipoV__429A3B81E89B4C0B");
+
+            entity.ToTable("tblTipoVehiculo");
+
+            entity.HasIndex(e => e.Nombre, "UQ__tblTipoV__72AFBCC6388796A6").IsUnique();
+
+            entity.Property(e => e.IdTipoVehiculo).HasColumnName("idTipoVehiculo");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(50)
+                .HasColumnName("nombre");
+        });
+
         modelBuilder.Entity<TblUsuario>(entity =>
         {
-            entity.HasKey(e => e.IdUsuario).HasName("PK__tblUsuar__645723A6DE4FF6B2");
+            entity.HasKey(e => e.IdUsuario).HasName("PK__tblUsuar__645723A68F139248");
 
             entity.ToTable("tblUsuario");
 
@@ -222,7 +248,7 @@ public partial class DataContext : DbContext
 
         modelBuilder.Entity<TblVehiculo>(entity =>
         {
-            entity.HasKey(e => e.Placa).HasName("PK__tblVehic__0C057424C1E7058F");
+            entity.HasKey(e => e.Placa).HasName("PK__tblVehic__0C05742446CA4711");
 
             entity.ToTable("tblVehiculo");
 
@@ -232,12 +258,15 @@ public partial class DataContext : DbContext
             entity.Property(e => e.Color)
                 .HasMaxLength(30)
                 .HasColumnName("color");
+            entity.Property(e => e.IdTipoVehiculo).HasColumnName("idTipoVehiculo");
             entity.Property(e => e.Marca)
                 .HasMaxLength(50)
                 .HasColumnName("marca");
-            entity.Property(e => e.Tipo)
-                .HasMaxLength(50)
-                .HasColumnName("tipo");
+
+            entity.HasOne(d => d.IdTipoVehiculoNavigation).WithMany(p => p.TblVehiculos)
+                .HasForeignKey(d => d.IdTipoVehiculo)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Vehiculo_Tipo");
         });
 
         OnModelCreatingPartial(modelBuilder);

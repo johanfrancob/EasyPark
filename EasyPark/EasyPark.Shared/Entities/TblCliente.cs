@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace EasyPark.Shared.Entities;
+
 public partial class TblCliente
 {
     public int IdCliente { get; set; }
@@ -13,7 +14,5 @@ public partial class TblCliente
 
     public string? Telefono { get; set; }
     [JsonIgnore]
-
-
     public virtual ICollection<TblTicketEntradum> TblTicketEntrada { get; set; } = new List<TblTicketEntradum>();
 }

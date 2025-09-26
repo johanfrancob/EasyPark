@@ -1,5 +1,4 @@
-﻿using EasyPark.Backend;
-using EasyPark.Backend.Data;
+﻿using EasyPark.Backend.Data;
 using EasyPark.Frontend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
