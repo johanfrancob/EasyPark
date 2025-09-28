@@ -1,6 +1,47 @@
-﻿@attribute [Authorize]
+﻿@page "/home"
+@attribute [Authorize]
 
-@page "/home"
-<MudText Typo="Typo.h4" Color="Color.Primary">Hola desde MudBlazor 🚀</MudText>
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
 
-<MudButton Variant="Variant.Filled" Color="Color.Secondary">Secondary</MudButton>
+<PageTitle>Inicio - EasyPark</PageTitle>
+
+<MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center" Style="height:100vh;">
+    <MudItem xs="12" sm="8" md="6" lg="4">
+        <MudPaper Class="pa-6 text-center" Elevation="6" Rounded="true">
+
+            <MudImage Src="Pictures/logo.jpg" Width="200" Height="180" Class="mb-4" />
+
+            <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-2">
+                ¡Bienvenido!
+            </MudText>
+
+            <MudText Typo="Typo.subtitle1" Color="Color.Info" Class="mb-3">
+                @usuarioRol
+            </MudText>
+
+            <MudDivider Class="my-4" />
+
+            <MudText Typo="Typo.body1" Color="Color.Info">
+                Selecciona una opción en el menú lateral para continuar 
+            </MudText>
+
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    
+    private string usuarioRol = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            usuarioRol = user.FindFirst(ClaimTypes.Role)?.Value ?? "Sin Rol";
+        }
+    }
+}
