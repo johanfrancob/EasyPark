@@ -58,6 +58,21 @@ namespace EasyPark.Backend.Controllers
             });
         }
 
+        [HttpGet("disponibles")]
+        public async Task<ActionResult<IEnumerable<object>>> GetBahiasDisponibles()
+        {
+            var disponibles = await _context.TblBahia
+                .Where(b => b.Estado == "Disponible")
+                .Select(b => new
+                {
+                    b.IdBahia,
+                    b.Ubicacion
+                })
+                .ToListAsync();
+
+            return Ok(disponibles);
+        }
+
         [HttpPost]
         public async Task<ActionResult<TblBahium>> Post(TblBahium bahia)
         {
