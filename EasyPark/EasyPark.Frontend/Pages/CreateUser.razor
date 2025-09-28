@@ -1,0 +1,18 @@
+﻿@page "/create-user"
+
+<PageTitle>Crear Usuario</PageTitle>
+
+<MudPaper Class="pa-6 mx-auto mt-8" MaxWidth="500px" Elevation="4" Rounded="true">
+    <MudText Typo="Typo.h5" Class="mb-4">Crear nuevo usuario</MudText>
+
+    <MudTextField T="string" Label="Cédula" Class="mb-3" />
+    <MudTextField T="string" Label="Nombre" Class="mb-3" />
+    <MudTextField T="string" Label="Correo electrónico" Class="mb-3" />
+    <MudTextField T="string" Label="Contraseña" InputType="InputType.Password" Class="mb-3" />
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-3" FullWidth="true">
+        Crear Usuario
+    </MudButton>
+</MudPaper>
+
+
