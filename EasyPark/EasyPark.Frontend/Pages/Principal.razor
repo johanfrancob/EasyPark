@@ -1,6 +1,7 @@
 ﻿@page "/principal"
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
+@using System.Net.Http.Json
 @inject HttpClient Http
 
 <MudGrid Class="pa-4" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
@@ -29,6 +30,27 @@
     </MudItem>
 </MudGrid>
 
+
+<MudDataGrid T="TblTicketEntradum" MultiSelection="true" Items="@tblTickets" SortMode="SortMode.Multiple"
+    Hideable="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Periodic Elements</MudText>
+        <MudSpacer />
+        <MudTextField Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="TblTicketEntradum" />
+        <PropertyColumn Property="x => x.IdTicket" Title="Nr" Sortable="false" Filterable="false" />
+        <PropertyColumn Property="x => x.Placa" />
+        <PropertyColumn Property="x => x.IdBahia" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="TblTicketEntradum" />
+    </PagerContent>
+</MudDataGrid>
+
+
 @code {
 
     public class ResumenBahias
@@ -38,6 +60,8 @@
         public int bh_disponibles_moto { get; set; }
         public int bh_total_moto { get; set; }
     }
+
+    private IEnumerable<TblTicketEntradum> tblTickets = new List<TblTicketEntradum>();
 
     string motosOcu = "";
     string carrosOcu = "";
@@ -51,5 +75,9 @@
             motosOcu = $"{resumen.bh_disponibles_moto}/{resumen.bh_total_moto}";
             carrosOcu = $"{resumen.bh_disponibles_carro}/{resumen.bh_total_carro}";
         }
+
+        tblTickets = await Http.GetFromJsonAsync<List<TblTicketEntradum>>("api/Tickets");
     }
+
+
 }

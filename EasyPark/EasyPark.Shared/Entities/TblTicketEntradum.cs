@@ -17,13 +17,13 @@ public partial class TblTicketEntradum
     public int IdBahia { get; set; }
     [JsonIgnore]
 
-    public virtual TblBahium IdBahiaNavigation { get; set; } = null!;
+    public virtual TblBahium? IdBahiaNavigation { get; set; }
     [JsonIgnore]
 
-    public virtual TblCliente IdClienteNavigation { get; set; } = null!;
+    public virtual TblCliente? IdClienteNavigation { get; set; }
     [JsonIgnore]
 
-    public virtual TblVehiculo PlacaNavigation { get; set; } = null!;
+    public virtual TblVehiculo? PlacaNavigation { get; set; }
     [JsonIgnore]
 
     public virtual ICollection<TblFactura> TblFacturas { get; set; } = new List<TblFactura>();
