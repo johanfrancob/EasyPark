@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@using EasyPark.Frontend.Services
+@using Microsoft.AspNetCore.Components.Authorization
 
 <CascadingAuthenticationState>
     <MudThemeProvider />
@@ -18,18 +20,30 @@
             </AuthorizeView>
 
             <MudText Typo="Typo.h6" Class="ml-2">EasyPark</MudText>
+
+            <MudSpacer />
+
+            <AuthorizeView>
+                <Authorized>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Inherit"
+                               StartIcon="@Icons.Material.Filled.Logout"
+                               OnClick="Logout">
+                        Cerrar sesión
+                    </MudButton>
+                </Authorized>
+            </AuthorizeView>
         </MudAppBar>
 
         <AuthorizeView>
             <Authorized>
-    
                 <MudDrawer @bind-Open="_drawerOpen"
                            MiniVariant="true"
                            Variant="DrawerVariant.Responsive"
                            Elevation="1"
                            Class="drawer-azul-rey">
                     <MudDrawerHeader>
-                        <MudText Typo="Typo.h6" Class="ml-2">Menu</MudText>
+                        <MudText Typo="Typo.h6" Class="ml-2">Menú</MudText>
                     </MudDrawerHeader>
                     <NavMenu />
                 </MudDrawer>
@@ -45,10 +59,19 @@
 </CascadingAuthenticationState>
 
 @code {
-    private bool _drawerOpen = false; // Arranca minimizado
+    private bool _drawerOpen = false;
 
     private void ToggleDrawer()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    [Inject] private AuthService AuthService { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/", forceLoad: true);
     }
 }

@@ -57,5 +57,7 @@ namespace EasyPark.Frontend.Services
             var authState = Task.FromResult(new AuthenticationState(_anonymous));
             NotifyAuthenticationStateChanged(authState);
         }
+
+
     }
 }
