@@ -25,6 +25,8 @@ namespace EasyPark.Backend.Data
             await CheckTipoVehiculosAsync();
             await CheckTarifasAsync();
             await CheckBahiasAsync();
+            await CheckVehiculosAsync();
+            await CheckClientesAsync(); 
 
         }
 
@@ -118,20 +120,20 @@ namespace EasyPark.Backend.Data
                 {
                     bahias.Add(new TblBahium
                     {
-                        Estado = "Libre",
+                        Estado = "Disponible",
                         IdTipoVehiculo = carro.IdTipoVehiculo,
-                        Ubicacion = $"C{i}"   
+                        Ubicacion = $"C{i}"
                     });
                 }
 
-               
+
                 for (int i = 1; i <= 5; i++)
                 {
                     bahias.Add(new TblBahium
                     {
-                        Estado = "Libre",
+                        Estado = "Disponible",
                         IdTipoVehiculo = moto.IdTipoVehiculo,
-                        Ubicacion = $"M{i}"   
+                        Ubicacion = $"M{i}"
                     });
                 }
 
@@ -140,6 +142,32 @@ namespace EasyPark.Backend.Data
             }
         }
 
+        private async Task CheckVehiculosAsync()
+        {
+            if (!_context.TblVehiculos.Any())
+            {
+                var carro = await _context.TblTipoVehiculos.FirstAsync(tv => tv.Nombre == "Carro");
+                var moto = await _context.TblTipoVehiculos.FirstAsync(tv => tv.Nombre == "Moto");
+                _context.TblVehiculos.AddRange(
+                    new TblVehiculo { Placa = "ABC123", Color = "Rojo", Marca = "Toyota", IdTipoVehiculo = carro.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "XYZ789", Color = "Azul", Marca = "Honda", IdTipoVehiculo = moto.IdTipoVehiculo }
+                );
+                await _context.SaveChangesAsync();
+            }
 
+        }
+
+        private async Task CheckClientesAsync()
+        {
+            if (!_context.TblClientes.Any())
+            {
+                _context.TblClientes.AddRange(
+                    new TblCliente { Nombre = "Consumidor final", Documento = "222222222222", Telefono = "00000000000" },
+                    new TblCliente { Nombre = "Juan Ruiz", Documento = "2001", Telefono = "3201234567" },
+                    new TblCliente { Nombre = "Laura Martínez", Documento = "2002", Telefono = "3309876543" }
+                );
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }
