@@ -185,7 +185,21 @@ namespace EasyPark.Backend.Data
                 _context.TblClientes.AddRange(
                     new TblCliente { Nombre = "Consumidor final", Documento = "222222222222", Telefono = "00000000000" },
                     new TblCliente { Nombre = "Juan Ruiz", Documento = "2001", Telefono = "3201234567" },
-                    new TblCliente { Nombre = "Laura Martínez", Documento = "2002", Telefono = "3309876543" }
+                    new TblCliente { Nombre = "Laura Martínez", Documento = "2002", Telefono = "3309876543" },
+                    new TblCliente { Nombre = "Andrés Gómez", Documento = "2003", Telefono = "3101112233" },
+                    new TblCliente { Nombre = "María Torres", Documento = "2004", Telefono = "3114445566" },
+                    new TblCliente { Nombre = "Carlos Rodríguez", Documento = "2005", Telefono = "3127778899" },
+                    new TblCliente { Nombre = "Sofía Ramírez", Documento = "2006", Telefono = "3130001122" },
+                    new TblCliente { Nombre = "Felipe Castro", Documento = "2007", Telefono = "3143334455" },
+                    new TblCliente { Nombre = "Diana López", Documento = "2008", Telefono = "3156667788" },
+                    new TblCliente { Nombre = "Ricardo Hernández", Documento = "2009", Telefono = "3169990011" },
+                    new TblCliente { Nombre = "Valentina Morales", Documento = "2010", Telefono = "3171237890" },
+                    new TblCliente { Nombre = "Miguel Ángel Ruiz", Documento = "2011", Telefono = "3183216547" },
+                    new TblCliente { Nombre = "Camila Jiménez", Documento = "2012", Telefono = "3196541230" },
+                    new TblCliente { Nombre = "Sebastián Vargas", Documento = "2013", Telefono = "3207418529" },
+                    new TblCliente { Nombre = "Paula Restrepo", Documento = "2014", Telefono = "3219632587" },
+                    new TblCliente { Nombre = "David Ramírez", Documento = "2015", Telefono = "3227894561" },
+                    new TblCliente { Nombre = "Natalia Fernández", Documento = "2016", Telefono = "3238521479" }
                 );
                 await _context.SaveChangesAsync();
             }
