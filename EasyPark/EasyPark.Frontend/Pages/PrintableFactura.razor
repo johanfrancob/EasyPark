@@ -7,25 +7,20 @@
         <div id="factura-content" class="factura-content"
              style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border: 1px solid #ccc; padding: 20px; width: 400px; margin: auto;">
 
-            <!-- LOGO -->
             <div style="text-align: center; margin-bottom: 10px;">
-                <img src="@($"{Navigation.BaseUri}images/logo_easypark.png")"
+                <img src="@($"{Navigation.BaseUri}Pictures/logo.jpg")"
                      alt="Logo EasyPark"
                      style="max-width: 80px; height: auto;" />
             </div>
-
-            <!-- ENCABEZADO -->
             <div style="text-align: center; margin-bottom: 20px;">
                 <h3 style="margin: 0;">EasyPark</h3>
                 <p style="margin: 0; font-size: 14px;">Recibo de Pago</p>
             </div>
 
-            <!-- INFO FACTURA -->
             <p><strong>Factura #:</strong> @Factura.IdFactura</p>
 
             <hr style="border: 1px dashed #ccc;" />
 
-            <!-- INFO DEL TICKET -->
             <p><strong>Placa:</strong> @Factura.Placa</p>
             <p><strong>Entrada:</strong> @Factura.FechaHoraEntrada.ToString("dd/MM/yyyy HH:mm")</p>
             <p><strong>Salida:</strong> @Factura.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</p>
@@ -35,18 +30,14 @@
             }
             <p><strong>Tiempo total:</strong> @($"{(int)tiempoTotal.TotalHours}h {tiempoTotal.Minutes}m")</p>
 
-            <!-- CLIENTE -->
             <p><strong>Cliente:</strong> @Factura.Cliente</p>
             <p><strong>Documento:</strong> @Factura.Documento</p>
 
             <hr style="border: 1px dashed #ccc;" />
 
-            <!-- MONTO -->
             <div style="text-align: right; margin-top: 20px;">
                 <h4 style="margin: 0;">TOTAL PAGADO: @Factura.Monto.ToString("C")</h4>
             </div>
-
-            <!-- PIE -->
             <p style="text-align: center; font-size: 12px; margin-top: 30px;">¡Gracias por su visita!</p>
         </div>
     </div>

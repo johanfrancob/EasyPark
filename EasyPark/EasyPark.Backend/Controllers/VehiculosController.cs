@@ -30,22 +30,14 @@ namespace EasyPark.Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<TblVehiculo>> Post(CrearVehiculoRequest request)
         {
-            // 1. Creamos la entidad completa que se guardará en la BD.
             var nuevoVehiculo = new TblVehiculo
             {
-                // 2. Asignamos la placa que viene del DTO.
                 Placa = request.Placa.ToUpper(),
-
-                // 3. Asignamos los valores opcionales si vienen en el DTO, si no, se quedan nulos.
                 Color = request.Color,
                 Marca = request.Marca,
-
-                // 4. Asignamos un valor por defecto para el campo obligatorio IdTipoVehiculo
-                //    si el usuario no lo envió. Usamos el ID 1 (Carro) como fallback.
                 IdTipoVehiculo = request.IdTipoVehiculo ?? 1
             };
 
-            // 5. Guardamos la nueva entidad en la base de datos.
             _context.TblVehiculos.Add(nuevoVehiculo);
             await _context.SaveChangesAsync();
 

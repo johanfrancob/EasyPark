@@ -17,7 +17,6 @@ namespace EasyPark.Backend.Controllers
 
         public TicketsController(DataContext context) => _context = context;
 
-        // ----------------- LISTAR TICKETS -----------------
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TblTicketEntradum>>> Get()
         {
@@ -33,7 +32,6 @@ namespace EasyPark.Backend.Controllers
                 .ToListAsync();
         }
 
-        // ----------------- OBTENER TICKET -----------------
         [HttpGet("{id}")]
         public async Task<ActionResult<TblTicketEntradum>> Get(int id)
         {
@@ -46,7 +44,6 @@ namespace EasyPark.Backend.Controllers
             return ticket is null ? NotFound() : ticket;
         }
 
-        // ----------------- CREAR TICKET -----------------
         [HttpPost]
         public async Task<ActionResult<TblTicketEntradum>> Post(TblTicketEntradum ticket)
         {
@@ -63,7 +60,6 @@ namespace EasyPark.Backend.Controllers
             return CreatedAtAction(nameof(Get), new { id = ticket.IdTicket }, ticket);
         }
 
-        // ----------------- EDITAR TICKET -----------------
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, TblTicketEntradum ticket)
         {
@@ -73,7 +69,6 @@ namespace EasyPark.Backend.Controllers
             return NoContent();
         }
 
-        // ----------------- ELIMINAR TICKET -----------------
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -85,11 +80,9 @@ namespace EasyPark.Backend.Controllers
             return NoContent();
         }
 
-        // ----------------- REGISTRAR SALIDA -----------------
         [HttpPost("registrar-salida/{idTicket}")]
         public async Task<ActionResult<FacturaDTO>> RegistrarSalida(int idTicket)
         {
-            // 1. Ticket
             var ticket = await _context.TblTicketEntrada
                 .Include(t => t.PlacaNavigation)
                 .FirstOrDefaultAsync(t => t.IdTicket == idTicket);
@@ -97,18 +90,15 @@ namespace EasyPark.Backend.Controllers
             if (ticket == null)
                 return NotFound("El ticket no fue encontrado.");
 
-            // 2. Bahía
             var bahia = await _context.TblBahia.FindAsync(ticket.IdBahia);
             if (bahia == null)
                 return NotFound("La bahía asociada al ticket no fue encontrada.");
 
-            // 3. Tarifa
             var tarifa = await _context.TblTarifas
                 .FirstOrDefaultAsync(t => t.IdTipoVehiculo == ticket.PlacaNavigation.IdTipoVehiculo);
             if (tarifa == null)
                 return NotFound("No se encontró una tarifa para este tipo de vehículo.");
 
-            // 4. Empleado desde el token
             var empleadoNombre = User.FindFirst(ClaimTypes.Name)?.Value;
             var usuario = await _context.TblUsuarios
                 .Include(u => u.IdEmpleadoNavigation)
@@ -119,12 +109,10 @@ namespace EasyPark.Backend.Controllers
 
             var idEmpleado = usuario.IdEmpleado;
 
-            // 5. Cálculo de monto
             var tiempoEstacionado = DateTime.Now - ticket.FechaHoraEntrada;
             var horasACobrar = (decimal)Math.Ceiling(tiempoEstacionado.TotalHours);
             var monto = horasACobrar * tarifa.ValorHora;
 
-            // 6. Crear factura
             var nuevaFactura = new TblFactura
             {
                 FechaHoraSalida = DateTime.Now,
@@ -140,7 +128,6 @@ namespace EasyPark.Backend.Controllers
             _context.TblBahia.Update(bahia);
             await _context.SaveChangesAsync();
 
-            // 7. Mapear a DTO
             var facturaDTO = new FacturaDTO
             {
                 IdFactura = nuevaFactura.IdFactura,

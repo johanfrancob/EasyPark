@@ -3,7 +3,6 @@
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
-                    @* Redirige al login si no está autorizado *@
                     @if (!context.User.Identity?.IsAuthenticated ?? true)
                     {
                         <RedirectToLogin />

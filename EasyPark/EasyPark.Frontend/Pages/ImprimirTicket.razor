@@ -7,7 +7,6 @@
 
 @if (Ticket != null)
 {
-    <!-- Contenedor que se convertirá en PDF -->
     <div id="ticket-content" style="font-family: Consolas, monospace; border: 1px solid black; padding: 10px; width: 300px; margin: 20px auto;">
         <h4 style="text-align: center; margin: 0;">EasyPark</h4>
         <p style="text-align: center; font-size: 12px; margin: 0;">¡Bienvenido!</p>
@@ -38,7 +37,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // Recuperar ticket desde sessionStorage
         var ticketJson = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "ticketToPrint");
 
         if (!string.IsNullOrEmpty(ticketJson))

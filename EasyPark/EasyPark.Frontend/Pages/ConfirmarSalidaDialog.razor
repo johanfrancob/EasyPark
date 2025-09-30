@@ -70,11 +70,9 @@
     {
         try
         {
-            // Obtenemos los datos del vehículo para saber su tipo y así encontrar la tarifa
             var vehiculo = await Http.GetFromJsonAsync<TblVehiculo>($"api/Vehiculos/{Ticket.Placa}");
             if (vehiculo != null)
             {
-                // Buscamos todas las tarifas y filtramos por el tipo de vehículo
                 var tarifas = await Http.GetFromJsonAsync<List<TblTarifa>>("api/Tarifas");
                 _tarifa = tarifas?.FirstOrDefault(t => t.IdTipoVehiculo == vehiculo.IdTipoVehiculo);
             }
@@ -89,7 +87,7 @@
         }
         catch (Exception ex)
         {
-            // Manejar error si no se puede calcular
+            ex.ToString();
         }
         finally
         {

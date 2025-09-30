@@ -60,9 +60,7 @@
     </PagerContent>
 </MudDataGrid>
 
-<!-- Contenedores para impresión: siempre en el DOM, pero ocultos visualmente -->
-<!-- Contenedores para impresión -->
-<!-- Contenedores para impresión: SIEMPRE presentes en el DOM -->
+
 <div id="ticket" class="print-content">
     @if (_lastCreatedTicket != null)
     {
@@ -124,7 +122,6 @@
     private TblFactura? _lastGeneratedFactura;
     private TblTicketEntradum? _lastCreatedTicket;
 
-    // Flags para controlar qué se muestra para impresión
     private bool _showTicketForPrint = false;
     private bool _showFacturaForPrint = false;
 
@@ -208,7 +205,6 @@
                     {
                         _lastCreatedTicket = await ticketResponse.Content.ReadFromJsonAsync<TblTicketEntradum>();
 
-                        // 👇 Log para verificar que tiene datos
                         Console.WriteLine($"[DEBUG] Ticket creado: Id={_lastCreatedTicket?.IdTicket}, Placa={_lastCreatedTicket?.Placa}");
 
                         if (_lastCreatedTicket == null)
@@ -232,11 +228,9 @@
                         var printResult = await printDialog.Result;
                         if (!printResult.Canceled)
                         {
-                            // Guardar el ticket en sessionStorage
                             var ticketJson = System.Text.Json.JsonSerializer.Serialize(_lastCreatedTicket);
                             await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "ticketToPrint", ticketJson);
 
-                            // Redirigir a la página de impresión
                             NavigationManager.NavigateTo("/imprimir-ticket");
                         }
                     }
@@ -270,7 +264,6 @@
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // 👇 Leer el DTO de la factura desde el backend
                     var facturaDTO = await response.Content.ReadFromJsonAsync<FacturaDTO>();
 
                     if (facturaDTO == null)
@@ -279,14 +272,12 @@
                         return;
                     }
 
-                    // Guardamos en una variable temporal
                     _lastGeneratedFactura = new TblFactura
                         {
                             IdFactura = facturaDTO.IdFactura,
                             FechaHoraSalida = facturaDTO.FechaHoraSalida,
                             Monto = facturaDTO.Monto,
                             IdTicket = facturaDTO.IdTicket,
-                        // ⚡ Nota: Los demás datos se muestran desde el DTO
                         };
 
                     Snackbar.Add("Salida registrada y factura generada con éxito.", Severity.Success);
@@ -305,11 +296,9 @@
 
                     if (!printResult.Canceled)
                     {
-                        // ✅ Guardar en sessionStorage el DTO completo
                         var facturaJson = JsonSerializer.Serialize(facturaDTO);
                         await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "facturaToPrint", facturaJson);
 
-                        // ✅ Redirigir a página de impresión
                         NavigationManager.NavigateTo("/imprimir-factura");
                     }
                 }

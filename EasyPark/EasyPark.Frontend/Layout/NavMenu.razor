@@ -5,13 +5,14 @@
             <MudNavLink Href= "/reset-password" Icon="@Icons.Material.Filled.Password" IconClass="large-icon">ResetPassword</MudNavLink>
             <MudNavLink Href="/crear-usuario" Icon="@Icons.Material.Filled.Create" IconClass="large-icon">CreateUser</MudNavLink>
             <MudNavLink Href="/consultar-ingresos" Icon="@Icons.Material.Filled.Check" IconClass="large-icon">CheckEntry</MudNavLink>
-            <MudNavLink Href="/principal" Icon="@Icons.Material.Filled.Check" IconClass="large-icon">Principal</MudNavLink>
+            <MudNavLink Href="/principal" Icon="@Icons.Material.Filled.Check" IconClass="large-icon">Registro</MudNavLink>
         </Authorized>
     </AuthorizeView>
 
     <AuthorizeView Roles="Cajero">
         <Authorized>
             <MudNavLink Href="/home" Icon="@Icons.Material.Filled.Home" IconClass="large-icon">Home</MudNavLink>
+            <MudNavLink Href="/principal" Icon="@Icons.Material.Filled.Check" IconClass="large-icon">Registro</MudNavLink>
         </Authorized>
     </AuthorizeView>
 
