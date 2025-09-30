@@ -116,7 +116,7 @@ namespace EasyPark.Backend.Data
 
                 var bahias = new List<TblBahium>();
 
-                for (int i = 1; i <= 10; i++)
+                for (int i = 1; i <= 20; i++)
                 {
                     bahias.Add(new TblBahium
                     {
@@ -126,8 +126,7 @@ namespace EasyPark.Backend.Data
                     });
                 }
 
-
-                for (int i = 1; i <= 5; i++)
+                for (int i = 1; i <= 30; i++)
                 {
                     bahias.Add(new TblBahium
                     {
@@ -148,13 +147,35 @@ namespace EasyPark.Backend.Data
             {
                 var carro = await _context.TblTipoVehiculos.FirstAsync(tv => tv.Nombre == "Carro");
                 var moto = await _context.TblTipoVehiculos.FirstAsync(tv => tv.Nombre == "Moto");
+
                 _context.TblVehiculos.AddRange(
+                    // Inicialización de Carros
                     new TblVehiculo { Placa = "ABC123", Color = "Rojo", Marca = "Toyota", IdTipoVehiculo = carro.IdTipoVehiculo },
-                    new TblVehiculo { Placa = "XYZ789", Color = "Azul", Marca = "Honda", IdTipoVehiculo = moto.IdTipoVehiculo }
+                    new TblVehiculo { Placa = "DEF456", Color = "Blanco", Marca = "Mazda", IdTipoVehiculo = carro.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "GHI789", Color = "Negro", Marca = "Chevrolet", IdTipoVehiculo = carro.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "JKL321", Color = "Gris", Marca = "Nissan", IdTipoVehiculo = carro.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "MNO654", Color = "Azul", Marca = "Ford", IdTipoVehiculo = carro.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "PQR987", Color = "Verde", Marca = "Hyundai", IdTipoVehiculo = carro.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "STU159", Color = "Amarillo", Marca = "Kia", IdTipoVehiculo = carro.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "VWX753", Color = "Plata", Marca = "Volkswagen", IdTipoVehiculo = carro.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "YZA852", Color = "Rojo", Marca = "Renault", IdTipoVehiculo = carro.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "BCD951", Color = "Azul", Marca = "Peugeot", IdTipoVehiculo = carro.IdTipoVehiculo },
+
+                    // Inicialización de Motos
+                    new TblVehiculo { Placa = "XYZ789", Color = "Azul", Marca = "Honda", IdTipoVehiculo = moto.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "EFG246", Color = "Negro", Marca = "Yamaha", IdTipoVehiculo = moto.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "HIJ357", Color = "Rojo", Marca = "Suzuki", IdTipoVehiculo = moto.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "KLM468", Color = "Blanco", Marca = "Kawasaki", IdTipoVehiculo = moto.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "NOP579", Color = "Gris", Marca = "BMW", IdTipoVehiculo = moto.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "QRS680", Color = "Amarillo", Marca = "Ducati", IdTipoVehiculo = moto.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "TUV791", Color = "Verde", Marca = "KTM", IdTipoVehiculo = moto.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "WXY802", Color = "Rojo", Marca = "Harley-Davidson", IdTipoVehiculo = moto.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "ZAB913", Color = "Negro", Marca = "Bajaj", IdTipoVehiculo = moto.IdTipoVehiculo },
+                    new TblVehiculo { Placa = "CDE024", Color = "Azul", Marca = "Italika", IdTipoVehiculo = moto.IdTipoVehiculo }
                 );
+
                 await _context.SaveChangesAsync();
             }
-
         }
 
         private async Task CheckClientesAsync()
