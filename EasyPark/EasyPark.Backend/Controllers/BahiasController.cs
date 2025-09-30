@@ -66,7 +66,8 @@ namespace EasyPark.Backend.Controllers
                 .Select(b => new
                 {
                     b.IdBahia,
-                    b.Ubicacion
+                    b.Ubicacion,
+                    b.IdTipoVehiculo
                 })
                 .ToListAsync();
 

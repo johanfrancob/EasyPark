@@ -1,0 +1,125 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using MudBlazor
+@inject HttpClient Http
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.AddLocationAlt" Class="mr-2" />
+            Registrar Nuevo Ingreso
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="form" @bind-IsValid="success" Class="mt-4">
+            <MudTextField @bind-Value="Model.Placa" Label="Placa del Vehículo"
+                          Required="true" RequiredError="La placa es obligatoria."
+                          Variant="Variant.Outlined" For="@(() => Model.Placa)" />
+
+            <MudSelect T="int" Label="1. Seleccione Tipo de Vehículo"
+                       Required="true" RequiredError="Debe seleccionar un tipo."
+                       Variant="Variant.Outlined"
+                       Value="Model.IdTipoVehiculo" ValueChanged="OnTipoVehiculoChanged"
+                       For="@(() => Model.IdTipoVehiculo)" Class="mt-4">
+                @if (_tiposVehiculo == null)
+                {
+                    <MudProgressCircular Indeterminate="true" />
+                }
+                else
+                {
+                    @foreach (var tipo in _tiposVehiculo)
+                    {
+                        <MudSelectItem T="int" Value="@tipo.IdTipoVehiculo">@tipo.Nombre</MudSelectItem>
+                    }
+                }
+            </MudSelect>
+
+            <MudSelect T="int" @bind-Value="Model.IdBahia"
+                       Label="2. Seleccione Bahía Disponible"
+                       Required="true" RequiredError="Debe seleccionar una bahía."
+                       Variant="Variant.Outlined"
+                       For="@(() => Model.IdBahia)" Class="mt-4"
+                       Disabled="@(Model.IdTipoVehiculo == 0)">
+                @if (_filteredBahias.Any())
+                {
+                    @foreach (var bahia in _filteredBahias)
+                    {
+                        <MudSelectItem T="int" Value="@bahia.IdBahia">@bahia.Ubicacion</MudSelectItem>
+                    }
+                }
+                else if (Model.IdTipoVehiculo != 0)
+                {
+                    <div class="pa-4">No hay bahías disponibles para este tipo.</div>
+                }
+            </MudSelect>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@Cancel">Cancelar</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   OnClick="@Submit" Disabled="@(!success)">Guardar Ingreso</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- 🔹 Ticket oculto para impresión -->
+<div id="ticket" style="display:none;">
+    <h3 style="text-align:center;">🎫 EasyPark</h3>
+    <p><b>Placa:</b> @Model.Placa</p>
+    <p><b>Tipo vehículo:</b> @_tiposVehiculo?.FirstOrDefault(t => t.IdTipoVehiculo == Model.IdTipoVehiculo)?.Nombre</p>
+    <p><b>Bahía:</b> @_allAvailableBahias?.FirstOrDefault(b => b.IdBahia == Model.IdBahia)?.Ubicacion</p>
+    <p><b>Hora ingreso:</b> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+    <hr />
+    <p style="text-align:center;">¡Gracias por su visita!</p>
+</div>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    private IngresoModel Model = new();
+    private MudForm form = default!;
+    private bool success;
+
+    private List<TblTipoVehiculo>? _tiposVehiculo;
+    private List<TblBahium>? _allAvailableBahias;
+    private List<TblBahium> _filteredBahias = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _tiposVehiculo = await Http.GetFromJsonAsync<List<TblTipoVehiculo>>("api/TipoVehiculos");
+            _allAvailableBahias = await Http.GetFromJsonAsync<List<TblBahium>>("api/Bahias/disponibles");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error al obtener datos iniciales: {ex.Message}");
+        }
+    }
+
+    private void OnTipoVehiculoChanged(int tipoVehiculoId)
+    {
+        Model.IdTipoVehiculo = tipoVehiculoId;
+        Model.IdBahia = 0;
+        if (_allAvailableBahias != null)
+        {
+            _filteredBahias = _allAvailableBahias.Where(b => b.IdTipoVehiculo == tipoVehiculoId).ToList();
+        }
+        StateHasChanged();
+    }
+
+    private async Task Submit()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            MudDialog.Close(DialogResult.Ok(Model));
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    public class IngresoModel
+    {
+        [Required] public string Placa { get; set; } = "";
+        [Range(1, int.MaxValue)] public int IdBahia { get; set; }
+        [Range(1, int.MaxValue)] public int IdTipoVehiculo { get; set; }
+    }
+}

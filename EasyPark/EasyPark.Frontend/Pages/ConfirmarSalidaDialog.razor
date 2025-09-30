@@ -1,0 +1,102 @@
+﻿@using EasyPark.Shared.Entities
+@inject HttpClient Http
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Confirmar Salida</MudText>
+    </TitleContent>
+
+    <DialogContent>
+        @if (_isLoading)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else if (Ticket != null)
+        {
+            <MudSimpleTable Style="width:100%;" Dense="true">
+                <tbody>
+                    <tr>
+                        <td><strong>Placa:</strong></td>
+                        <td>@Ticket.Placa</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Entrada:</strong></td>
+                        <td>@Ticket.FechaHoraEntrada.ToString("g")</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tiempo Transcurrido:</strong></td>
+                        <td>@_tiempoTranscurrido</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tarifa por Hora:</strong></td>
+                        <td>@_tarifa?.ValorHora.ToString("C")</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <MudText Typo="Typo.h6"><strong>Total a Pagar:</strong></MudText>
+                        </td>
+                        <td>
+                            <MudText Typo="Typo.h6" Color="Color.Primary">
+                                <strong>@_montoTotal.ToString("C")</strong>
+                            </MudText>
+                        </td>
+                    </tr>
+                </tbody>
+            </MudSimpleTable>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancelar</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">
+            Confirmar y Pagar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public TblTicketEntradum Ticket { get; set; } = default!;
+
+    private bool _isLoading = true;
+    private TblTarifa? _tarifa;
+    private string _tiempoTranscurrido = "";
+    private decimal _montoTotal = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Obtenemos los datos del vehículo para saber su tipo y así encontrar la tarifa
+            var vehiculo = await Http.GetFromJsonAsync<TblVehiculo>($"api/Vehiculos/{Ticket.Placa}");
+            if (vehiculo != null)
+            {
+                // Buscamos todas las tarifas y filtramos por el tipo de vehículo
+                var tarifas = await Http.GetFromJsonAsync<List<TblTarifa>>("api/Tarifas");
+                _tarifa = tarifas?.FirstOrDefault(t => t.IdTipoVehiculo == vehiculo.IdTipoVehiculo);
+            }
+
+            if (_tarifa != null)
+            {
+                var tiempo = DateTime.Now - Ticket.FechaHoraEntrada;
+                _tiempoTranscurrido = $"{tiempo.Days}d {tiempo.Hours}h {tiempo.Minutes}m";
+                var horasACobrar = (decimal)Math.Ceiling(tiempo.TotalHours);
+                _montoTotal = horasACobrar * _tarifa.ValorHora;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Manejar error si no se puede calcular
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    private void Cancel() => MudDialog.Cancel();
+}

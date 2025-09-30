@@ -1,57 +1,332 @@
 ﻿@page "/principal"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
 @using System.Net.Http.Json
 @inject HttpClient Http
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@using System.Text.Json
+@using EasyPark.Shared.DTOs
+
 
 <MudGrid Class="pa-4" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
     <MudItem xs="12" sm="9" md="9">
         <MudGrid>
             <MudItem xs="6">
                 <MudPaper Class="pa-4" Outlined="true">
-                    <MudText Typo="Typo.h6">Motos</MudText>
+                    <MudText Typo="Typo.h6">Motos Disponibles</MudText>
                     <MudText Typo="Typo.h4" Color="Color.Primary">@motosOcu</MudText>
                 </MudPaper>
             </MudItem>
-
             <MudItem xs="6">
                 <MudPaper Class="pa-4" Outlined="true">
-                    <MudText Typo="Typo.h6">Carros</MudText>
+                    <MudText Typo="Typo.h6">Carros Disponibles</MudText>
                     <MudText Typo="Typo.h4" Color="Color.Secondary">@carrosOcu</MudText>
                 </MudPaper>
             </MudItem>
         </MudGrid>
     </MudItem>
-
     <MudItem xs="12" sm="3" md="3" Class="d-flex justify-end align-center">
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" StartIcon="@Icons.Material.Filled.Add" @onclick="AbrirModalNuevoIngreso">
             Nuevo Ingreso
         </MudButton>
     </MudItem>
 </MudGrid>
 
-
-<MudDataGrid T="TblTicketEntradum" MultiSelection="true" Items="@tblTickets" SortMode="SortMode.Multiple"
-    Hideable="true">
+<MudDataGrid T="TblTicketEntradum" Items="@_pagedTickets" Dense="true" Striped="true" Bordered="true">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Periodic Elements</MudText>
+        <MudText Typo="Typo.h6">Tickets Activos</MudText>
         <MudSpacer />
-        <MudTextField Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        <MudTextField T="string" ValueChanged="@(OnSearch)" Placeholder="Buscar por placa..." Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300"></MudTextField>
     </ToolBarContent>
     <Columns>
-        <SelectColumn T="TblTicketEntradum" />
-        <PropertyColumn Property="x => x.IdTicket" Title="Nr" Sortable="false" Filterable="false" />
+        <PropertyColumn Property="x => x.IdTicket" Title="ID Ticket" />
         <PropertyColumn Property="x => x.Placa" />
-        <PropertyColumn Property="x => x.IdBahia" />
+        <PropertyColumn Property="x => x.IdBahia" Title="ID Bahía" />
+        <PropertyColumn Property="x => x.FechaHoraEntrada" Title="Fecha de Entrada" Format="g" />
+        <TemplateColumn Title="Acciones" Style="text-align:center">
+            <CellTemplate>
+                <MudIconButton Icon="@Icons.Material.Filled.ExitToApp" Color="Color.Primary" Title="Registrar Salida" OnClick="@(() => RegistrarSalida(context.Item))" />
+            </CellTemplate>
+        </TemplateColumn>
     </Columns>
     <PagerContent>
         <MudDataGridPager T="TblTicketEntradum" />
     </PagerContent>
 </MudDataGrid>
 
+<!-- Contenedores para impresión: siempre en el DOM, pero ocultos visualmente -->
+<!-- Contenedores para impresión -->
+<!-- Contenedores para impresión: SIEMPRE presentes en el DOM -->
+<div id="ticket" class="print-content">
+    @if (_lastCreatedTicket != null)
+    {
+        <div class="ticket-wrapper">
+            <div class="ticket-content" style="font-family: Consolas, monospace; border: 1px solid black; padding: 10px; width: 300px;">
+                <h4 style="text-align: center; margin: 0;">EasyPark</h4>
+                <p style="text-align: center; font-size: 12px; margin: 0;">¡Bienvenido!</p>
+                <hr />
+                <p><strong>Ticket ID:</strong> @_lastCreatedTicket.IdTicket</p>
+                <p><strong>Placa:</strong> @_lastCreatedTicket.Placa</p>
+                <p><strong>Bahía:</strong> @_lastCreatedTicket.IdBahia</p>
+                <p><strong>Entrada:</strong> @_lastCreatedTicket.FechaHoraEntrada.ToString("dd/MM/yyyy HH:mm")</p>
+                <hr />
+                <p style="text-align: center; font-size: 10px;">Conserve este ticket para la salida.</p>
+            </div>
+        </div>
+    }
+</div>
 
+<div id="facturaParaImprimir" class="print-content">
+    @if (_lastGeneratedFactura != null)
+    {
+        <div class="factura-wrapper">
+            <div class="factura-content" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border: 1px solid #ccc; padding: 20px; width: 400px; margin: auto;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0;">EasyPark</h3>
+                    <p style="margin: 0; font-size: 14px;">Recibo de Pago</p>
+                </div>
+
+                <p><strong>Factura #:</strong> @_lastGeneratedFactura.IdFactura</p>
+                <p><strong>Fecha Salida:</strong> @_lastGeneratedFactura.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</p>
+
+                <hr style="border: 1px dashed #ccc;" />
+
+                @if (_lastGeneratedFactura.IdTicketNavigation != null)
+                {
+                    <p><strong>Ticket ID:</strong> @_lastGeneratedFactura.IdTicketNavigation.IdTicket</p>
+                    <p><strong>Placa:</strong> @_lastGeneratedFactura.IdTicketNavigation.Placa</p>
+                    <p><strong>Entrada:</strong> @_lastGeneratedFactura.IdTicketNavigation.FechaHoraEntrada.ToString("dd/MM/yyyy HH:mm")</p>
+                }
+
+                <hr style="border: 1px dashed #ccc;" />
+
+                <div style="text-align: right; margin-top: 20px;">
+                    <h4 style="margin: 0;">TOTAL PAGADO: @_lastGeneratedFactura.Monto.ToString("C")</h4>
+                </div>
+
+                <p style="text-align: center; font-size: 12px; margin-top: 30px;">¡Gracias por su visita!</p>
+            </div>
+        </div>
+    }
+</div>
 @code {
+    private List<TblTicketEntradum> _allTickets = new();
+    private IEnumerable<TblTicketEntradum> _pagedTickets = new List<TblTicketEntradum>();
+    private string motosOcu = "0/0";
+    private string carrosOcu = "0/0";
+    private string _searchString = "";
+    private TblFactura? _lastGeneratedFactura;
+    private TblTicketEntradum? _lastCreatedTicket;
+
+    // Flags para controlar qué se muestra para impresión
+    private bool _showTicketForPrint = false;
+    private bool _showFacturaForPrint = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarResumen();
+        await CargarTickets();
+    }
+
+    private async Task CargarResumen()
+    {
+        var resumen = await Http.GetFromJsonAsync<ResumenBahias>("api/bahias/resumen");
+        if (resumen != null)
+        {
+            motosOcu = $"{resumen.bh_disponibles_moto}/{resumen.bh_total_moto}";
+            carrosOcu = $"{resumen.bh_disponibles_carro}/{resumen.bh_total_carro}";
+            StateHasChanged();
+        }
+    }
+
+    private async Task CargarTickets()
+    {
+        _allTickets = await Http.GetFromJsonAsync<List<TblTicketEntradum>>("api/Tickets") ?? new();
+        FilterTickets();
+    }
+
+    private void FilterTickets()
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+        {
+            _pagedTickets = _allTickets;
+        }
+        else
+        {
+            _pagedTickets = _allTickets.Where(t => t.Placa?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false);
+        }
+        StateHasChanged();
+    }
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        FilterTickets();
+    }
+
+    private async Task AbrirModalNuevoIngreso()
+    {
+        var dialog = await DialogService.ShowAsync<IngresoVehiculoDialog>("Registrar Nuevo Ingreso");
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            var nuevoIngreso = result.Data as IngresoVehiculoDialog.IngresoModel;
+            if (nuevoIngreso != null)
+            {
+                try
+                {
+                    var placa = nuevoIngreso.Placa.ToUpper();
+                    var vehiculoResponse = await Http.GetAsync($"api/Vehiculos/{placa}");
+                    if (!vehiculoResponse.IsSuccessStatusCode)
+                    {
+                        var nuevoVehiculo = new TblVehiculo { Placa = placa, IdTipoVehiculo = nuevoIngreso.IdTipoVehiculo };
+                        var creacionVehiculoResponse = await Http.PostAsJsonAsync("api/Vehiculos", nuevoVehiculo);
+                        if (!creacionVehiculoResponse.IsSuccessStatusCode)
+                        {
+                            Snackbar.Add("Error crítico: No se pudo crear el nuevo vehículo.", Severity.Error);
+                            return;
+                        }
+                    }
+
+                    var nuevoTicket = new TblTicketEntradum
+                        {
+                            Placa = placa,
+                            IdBahia = nuevoIngreso.IdBahia,
+                            IdCliente = 1,
+                            FechaHoraEntrada = DateTime.Now
+                        };
+                    var ticketResponse = await Http.PostAsJsonAsync("api/Tickets", nuevoTicket);
+
+                    if (ticketResponse.IsSuccessStatusCode)
+                    {
+                        _lastCreatedTicket = await ticketResponse.Content.ReadFromJsonAsync<TblTicketEntradum>();
+
+                        // 👇 Log para verificar que tiene datos
+                        Console.WriteLine($"[DEBUG] Ticket creado: Id={_lastCreatedTicket?.IdTicket}, Placa={_lastCreatedTicket?.Placa}");
+
+                        if (_lastCreatedTicket == null)
+                        {
+                            Snackbar.Add("Error: No se pudo obtener el ticket generado.", Severity.Error);
+                            return;
+                        }
+                        Snackbar.Add("¡Ingreso registrado con éxito!", Severity.Success);
+                        await CargarTickets();
+                        await CargarResumen();
+                        await Task.Delay(100);
+
+                        var printParams = new DialogParameters<ConfirmationDialog>
+                            {
+                                [nameof(ConfirmationDialog.ContentText)] = "¿Desea imprimir el ticket de entrada?",
+                                [nameof(ConfirmationDialog.Title)] = "Imprimir Ticket",
+                                [nameof(ConfirmationDialog.Color)] = Color.Primary
+                            };
+                        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+                        var printDialog = await DialogService.ShowAsync<ConfirmationDialog>("Imprimir Ticket", printParams, options);
+                        var printResult = await printDialog.Result;
+                        if (!printResult.Canceled)
+                        {
+                            // Guardar el ticket en sessionStorage
+                            var ticketJson = System.Text.Json.JsonSerializer.Serialize(_lastCreatedTicket);
+                            await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "ticketToPrint", ticketJson);
+
+                            // Redirigir a la página de impresión
+                            NavigationManager.NavigateTo("/imprimir-ticket");
+                        }
+                    }
+                    else
+                    {
+                        Snackbar.Add("Error al registrar el ticket.", Severity.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"Ocurrió una excepción: {ex.Message}", Severity.Error);
+                }
+            }
+        }
+    }
+
+    private async Task RegistrarSalida(TblTicketEntradum ticket)
+    {
+        var parameters = new DialogParameters<ConfirmarSalidaDialog>
+            {
+                [nameof(ConfirmarSalidaDialog.Ticket)] = ticket
+            };
+        var dialog = await DialogService.ShowAsync<ConfirmarSalidaDialog>("Registrar Salida de Vehículo", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            try
+            {
+                var response = await Http.PostAsync($"api/Tickets/registrar-salida/{ticket.IdTicket}", null);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // 👇 Leer el DTO de la factura desde el backend
+                    var facturaDTO = await response.Content.ReadFromJsonAsync<FacturaDTO>();
+
+                    if (facturaDTO == null)
+                    {
+                        Snackbar.Add("Error: No se pudo obtener la factura generada.", Severity.Error);
+                        return;
+                    }
+
+                    // Guardamos en una variable temporal
+                    _lastGeneratedFactura = new TblFactura
+                        {
+                            IdFactura = facturaDTO.IdFactura,
+                            FechaHoraSalida = facturaDTO.FechaHoraSalida,
+                            Monto = facturaDTO.Monto,
+                            IdTicket = facturaDTO.IdTicket,
+                        // ⚡ Nota: Los demás datos se muestran desde el DTO
+                        };
+
+                    Snackbar.Add("Salida registrada y factura generada con éxito.", Severity.Success);
+                    await CargarTickets();
+                    await CargarResumen();
+
+                    var printParams = new DialogParameters<ConfirmationDialog>
+                        {
+                            [nameof(ConfirmationDialog.ContentText)] = "¿Desea imprimir la factura generada?",
+                            [nameof(ConfirmationDialog.Color)] = Color.Success
+                        };
+
+                    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+                    var printDialog = await DialogService.ShowAsync<ConfirmationDialog>("Imprimir Factura", printParams, options);
+                    var printResult = await printDialog.Result;
+
+                    if (!printResult.Canceled)
+                    {
+                        // ✅ Guardar en sessionStorage el DTO completo
+                        var facturaJson = JsonSerializer.Serialize(facturaDTO);
+                        await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "facturaToPrint", facturaJson);
+
+                        // ✅ Redirigir a página de impresión
+                        NavigationManager.NavigateTo("/imprimir-factura");
+                    }
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add($"Error al registrar la salida: {error}", Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Ocurrió una excepción: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+
 
     public class ResumenBahias
     {
@@ -60,24 +335,4 @@
         public int bh_disponibles_moto { get; set; }
         public int bh_total_moto { get; set; }
     }
-
-    private IEnumerable<TblTicketEntradum> tblTickets = new List<TblTicketEntradum>();
-
-    string motosOcu = "";
-    string carrosOcu = "";
-
-    protected override async Task OnInitializedAsync()
-    {
-        var resumen = await Http.GetFromJsonAsync<ResumenBahias>("api/bahias/resumen");
-
-        if (resumen is not null)
-        {
-            motosOcu = $"{resumen.bh_disponibles_moto}/{resumen.bh_total_moto}";
-            carrosOcu = $"{resumen.bh_disponibles_carro}/{resumen.bh_total_carro}";
-        }
-
-        tblTickets = await Http.GetFromJsonAsync<List<TblTicketEntradum>>("api/Tickets");
-    }
-
-
 }

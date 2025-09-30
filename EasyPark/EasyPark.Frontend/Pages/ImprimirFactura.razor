@@ -1,0 +1,51 @@
+﻿@page "/imprimir-factura"
+@using EasyPark.Shared.DTOs
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+
+<h3 style="text-align:center;">Vista previa de la factura</h3>
+
+@if (Factura != null)
+{
+    <!-- Reutilizamos tu componente PrintableFactura -->
+    <PrintableFactura Factura="Factura" />
+
+    <div style="text-align:center; margin-top:20px;">
+        <button @onclick="GenerarPdf">📄 Descargar Factura en PDF</button>
+        <button @onclick="Volver">⬅️ Volver</button>
+    </div>
+}
+else
+{
+    <div style="color: red; text-align: center; margin-top: 50px;">
+        ❌ No se encontraron datos de la factura.<br />
+        Verifica que se guardó correctamente en sessionStorage.
+    </div>
+}
+
+@code {
+    private FacturaDTO? Factura;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var facturaJson = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "facturaToPrint");
+
+        if (!string.IsNullOrEmpty(facturaJson))
+        {
+            Factura = System.Text.Json.JsonSerializer.Deserialize<FacturaDTO>(facturaJson);
+        }
+    }
+
+    private async Task GenerarPdf()
+    {
+        if (Factura != null)
+        {
+            await JSRuntime.InvokeVoidAsync("ticketPdf", "factura-content", $"Factura_{Factura.IdFactura}.pdf");
+        }
+    }
+
+    private void Volver()
+    {
+        Navigation.NavigateTo("/principal");
+    }
+}

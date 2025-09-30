@@ -1,0 +1,62 @@
+﻿@page "/imprimir-ticket"
+@using EasyPark.Shared.Entities
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+
+<h3 style="text-align:center;">Vista previa del ticket</h3>
+
+@if (Ticket != null)
+{
+    <!-- Contenedor que se convertirá en PDF -->
+    <div id="ticket-content" style="font-family: Consolas, monospace; border: 1px solid black; padding: 10px; width: 300px; margin: 20px auto;">
+        <h4 style="text-align: center; margin: 0;">EasyPark</h4>
+        <p style="text-align: center; font-size: 12px; margin: 0;">¡Bienvenido!</p>
+        <hr />
+        <p><strong>Ticket ID:</strong> @Ticket.IdTicket</p>
+        <p><strong>Placa:</strong> @Ticket.Placa</p>
+        <p><strong>Bahía:</strong> @Ticket.IdBahia</p>
+        <p><strong>Entrada:</strong> @Ticket.FechaHoraEntrada.ToString("dd/MM/yyyy HH:mm")</p>
+        <hr />
+        <p style="text-align: center; font-size: 10px;">Conserve este ticket para la salida.</p>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+        <button @onclick="GenerarPdf">📄 Descargar Ticket en PDF</button>
+        <button @onclick="Volver">⬅️ Volver</button>
+    </div>
+}
+else
+{
+    <div style="color: red; text-align: center; margin-top: 50px;">
+        ❌ No se encontraron datos del ticket.<br />
+        Verifica que se guardó correctamente en sessionStorage.
+    </div>
+}
+
+@code {
+    private TblTicketEntradum? Ticket;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Recuperar ticket desde sessionStorage
+        var ticketJson = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "ticketToPrint");
+
+        if (!string.IsNullOrEmpty(ticketJson))
+        {
+            Ticket = System.Text.Json.JsonSerializer.Deserialize<TblTicketEntradum>(ticketJson);
+        }
+    }
+
+    private async Task GenerarPdf()
+    {
+        if (Ticket != null)
+        {
+            await JSRuntime.InvokeVoidAsync("ticketPdf", "ticket-content", $"Ticket_{Ticket.Placa}.pdf");
+        }
+    }
+
+    private void Volver()
+    {
+        Navigation.NavigateTo("/principal");
+    }
+}

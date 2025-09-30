@@ -44,7 +44,7 @@ namespace EasyPark.Frontend.Services
 
         public async Task LogoutAsync()
         {
-            await _js.InvokeVoidAsync("localStorage.removeItem", "authToken");
+            await _js.InvokeVoidAsync("sessionStorage.removeItem", "authToken");
             _authStateProvider.NotifyUserLogout();
         }
     }

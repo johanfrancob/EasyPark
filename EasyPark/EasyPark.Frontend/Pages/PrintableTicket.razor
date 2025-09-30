@@ -1,0 +1,32 @@
+﻿@using EasyPark.Shared.Entities
+@inject NavigationManager Navigation
+
+@if (Ticket != null)
+{
+    <div class="ticket-wrapper">
+        <div class="ticket-content" style="font-family: Consolas, monospace; border: 1px solid black; padding: 10px; width: 300px;">
+
+            <!-- LOGO -->
+            <div style="text-align: center; margin-bottom: 5px;">
+                <img src="@($"{Navigation.BaseUri}images/logo_easypark.png")"
+                     alt="Logo EasyPark"
+                     style="max-width: 60px; height: auto;" />
+            </div>
+
+            <h4 style="text-align: center; margin: 0;">EasyPark</h4>
+            <p style="text-align: center; font-size: 12px; margin: 0;">¡Bienvenido!</p>
+            <hr />
+            <p><strong>Ticket ID:</strong> @Ticket.IdTicket</p>
+            <p><strong>Placa:</strong> @Ticket.Placa</p>
+            <p><strong>Bahía:</strong> @Ticket.IdBahia</p>
+            <p><strong>Entrada:</strong> @Ticket.FechaHoraEntrada.ToString("dd/MM/yyyy HH:mm")</p>
+            <hr />
+            <p style="text-align: center; font-size: 10px;">Conserve este ticket para la salida.</p>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public TblTicketEntradum? Ticket { get; set; }
+}

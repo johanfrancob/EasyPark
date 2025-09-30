@@ -1,3 +1,6 @@
+/* ========================================
+   ESTILOS GENERALES
+======================================== */
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -16,8 +19,12 @@ a, .btn-link {
     border-color: #1861ac;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -36,6 +43,13 @@ a, .btn-link {
     color: red;
 }
 
+code {
+    color: #c02d76;
+}
+
+/* ========================================
+   ERRORES Y CARGA
+======================================== */
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -62,7 +76,7 @@ a, .btn-link {
 }
 
     .blazor-error-boundary::after {
-        content: "An error has occurred."
+        content: "An error has occurred.";
     }
 
 .loading-progress {
@@ -98,13 +112,9 @@ a, .btn-link {
         content: var(--blazor-load-percentage-text, "Loading");
     }
 
-code {
-    color: #c02d76;
-
-}
-
-
-
+/* ========================================
+   ESTILOS DE LOGIN Y UI
+======================================== */
 .login-container {
     position: center;
     right: 300px;
@@ -142,24 +152,77 @@ code {
 
 .drawer-gradient {
     background: linear-gradient(180deg, #0D1B2A, #1B263B, #415A77);
-    color: white; /* Texto blanco */
+    color: white;
 }
 
 .drawer-azul-rey {
-    background-color: #0C384A; /* Azul Rey */
-    color: white; /* Texto en blanco para mejor contraste */
+    background-color: #0C384A;
+    color: white;
 }
 
 .large-icon {
-    font-size: 32px; /* Puedes ajustar este valor según lo que necesites */
+    font-size: 32px;
 }
 
 .login-background {
-    height: calc(100vh - 64px); /* Ajusta para que se vea completo con AppBar */
+    height: calc(100vh - 64px);
     background-image: url('/Pictures/banner.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     display: flex;
     align-items: center;
+}
+
+/* ========================================
+   ESTILOS PARA IMPRESIÓN
+======================================== */
+.print-content {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+@media print {
+    /* Oculta TODO el contenido de la página */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Muestra SOLO los contenedores con IDs específicos */
+    #ticket,
+    #facturaParaImprimir {
+        visibility: visible !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 10mm !important; /* margen interno */
+        font-size: 14px !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+    }
+
+    body {
+        background: white !important;
+    }
+
+    #ticket img,
+    #facturaParaImprimir img {
+        max-width: 200px;
+        height: auto;
+    }
+}
+
+/* Opcional: tamaño de página para impresión */
+@page {
+    size: A5 portrait;
+    margin: 10mm;
 }
