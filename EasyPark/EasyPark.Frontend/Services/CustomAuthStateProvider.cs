@@ -17,7 +17,6 @@ namespace EasyPark.Frontend.Services
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            // Leer token de localStorage
             var token = await _js.InvokeAsync<string>("sessionStorage.getItem", "authToken");
 
 
