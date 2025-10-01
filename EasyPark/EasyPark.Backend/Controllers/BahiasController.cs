@@ -1,4 +1,5 @@
 ﻿using EasyPark.Backend.Data;
+using EasyPark.Backend.Services.Abstractions;
 using EasyPark.Shared.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +11,14 @@ namespace EasyPark.Backend.Controllers
     public class BahiasController : ControllerBase
     {
         private readonly DataContext _context;
+        private readonly IParkingFacade _facade;
 
-        public BahiasController(DataContext context) => _context = context;
+        public BahiasController(DataContext context, IParkingFacade facade)
+        {
+            _context = context;
+            _facade = facade;
+        }
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TblBahium>>> Get() =>
@@ -58,21 +65,6 @@ namespace EasyPark.Backend.Controllers
             });
         }
 
-        [HttpGet("disponibles")]
-        public async Task<ActionResult<IEnumerable<object>>> GetBahiasDisponibles()
-        {
-            var disponibles = await _context.TblBahia
-                .Where(b => b.Estado == "Disponible")
-                .Select(b => new
-                {
-                    b.IdBahia,
-                    b.Ubicacion,
-                    b.IdTipoVehiculo
-                })
-                .ToListAsync();
-
-            return Ok(disponibles);
-        }
 
         [HttpPost]
         public async Task<ActionResult<TblBahium>> Post(TblBahium bahia)
@@ -81,5 +73,10 @@ namespace EasyPark.Backend.Controllers
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(Get), new { id = bahia.IdBahia }, bahia);
         }
+
+
+        [HttpGet("bahias-disponibles")]
+        public async Task<IActionResult> BahiasDisponibles() => Ok(await _facade.GetBahiasDisponiblesAsync());
+
     }
 }

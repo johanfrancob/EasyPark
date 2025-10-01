@@ -1,16 +1,9 @@
 ﻿@page "/principal"
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
-
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
 @using System.Net.Http.Json
-@inject HttpClient Http
-@inject IDialogService DialogService
-@inject ISnackbar Snackbar
-@inject IJSRuntime JSRuntime
-@inject NavigationManager NavigationManager
-@using System.Text.Json
-@using EasyPark.Shared.DTOs
+
 
 
 <MudGrid Class="pa-4" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
@@ -180,6 +173,7 @@
                 try
                 {
                     var placa = nuevoIngreso.Placa.ToUpper();
+
                     var vehiculoResponse = await Http.GetAsync($"api/Vehiculos/{placa}");
                     if (!vehiculoResponse.IsSuccessStatusCode)
                     {
@@ -192,51 +186,52 @@
                         }
                     }
 
-                    var nuevoTicket = new TblTicketEntradum
-                        {
-                            Placa = placa,
-                            IdBahia = nuevoIngreso.IdBahia,
-                            IdCliente = 1,
-                            FechaHoraEntrada = DateTime.Now
-                        };
-                    var ticketResponse = await Http.PostAsJsonAsync("api/Tickets", nuevoTicket);
+                    var request = new RegistrarEntradaRequest
+                    {
+                        Placa = placa,
+                        IdCliente = 1,            
+                        IdBahia = nuevoIngreso.IdBahia
+                    };
+
+                    var ticketResponse = await Http.PostAsJsonAsync("api/Tickets/registrar-entrada", request);
 
                     if (ticketResponse.IsSuccessStatusCode)
                     {
                         _lastCreatedTicket = await ticketResponse.Content.ReadFromJsonAsync<TblTicketEntradum>();
-
-                        Console.WriteLine($"[DEBUG] Ticket creado: Id={_lastCreatedTicket?.IdTicket}, Placa={_lastCreatedTicket?.Placa}");
 
                         if (_lastCreatedTicket == null)
                         {
                             Snackbar.Add("Error: No se pudo obtener el ticket generado.", Severity.Error);
                             return;
                         }
+
                         Snackbar.Add("¡Ingreso registrado con éxito!", Severity.Success);
+
                         await CargarTickets();
                         await CargarResumen();
                         await Task.Delay(100);
 
                         var printParams = new DialogParameters<ConfirmationDialog>
-                            {
-                                [nameof(ConfirmationDialog.ContentText)] = "¿Desea imprimir el ticket de entrada?",
-                                [nameof(ConfirmationDialog.Title)] = "Imprimir Ticket",
-                                [nameof(ConfirmationDialog.Color)] = Color.Primary
-                            };
+                        {
+                            [nameof(ConfirmationDialog.ContentText)] = "¿Desea imprimir el ticket de entrada?",
+                            [nameof(ConfirmationDialog.Title)] = "Imprimir Ticket",
+                            [nameof(ConfirmationDialog.Color)] = Color.Primary
+                        };
                         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
                         var printDialog = await DialogService.ShowAsync<ConfirmationDialog>("Imprimir Ticket", printParams, options);
                         var printResult = await printDialog.Result;
+
                         if (!printResult.Canceled)
                         {
                             var ticketJson = System.Text.Json.JsonSerializer.Serialize(_lastCreatedTicket);
                             await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "ticketToPrint", ticketJson);
-
                             NavigationManager.NavigateTo("/imprimir-ticket");
                         }
                     }
                     else
                     {
-                        Snackbar.Add("Error al registrar el ticket.", Severity.Error);
+                        var err = await ticketResponse.Content.ReadAsStringAsync();
+                        Snackbar.Add($"Error al registrar el ticket: {err}", Severity.Error);
                     }
                 }
                 catch (Exception ex)
@@ -246,6 +241,7 @@
             }
         }
     }
+
 
     private async Task RegistrarSalida(TblTicketEntradum ticket)
     {

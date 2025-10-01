@@ -1,10 +1,14 @@
-﻿using EasyPark.Backend.Data;
-using EasyPark.Shared.Entities;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using EasyPark.Backend.Data;
+using EasyPark.Backend.Services.Abstractions;
 using EasyPark.Shared.DTOs;
+using EasyPark.Shared.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 
 namespace EasyPark.Backend.Controllers
 {
@@ -14,8 +18,13 @@ namespace EasyPark.Backend.Controllers
     public class TicketsController : ControllerBase
     {
         private readonly DataContext _context;
+        private readonly IParkingFacade _facade;
 
-        public TicketsController(DataContext context) => _context = context;
+        public TicketsController(DataContext context, IParkingFacade facade)
+        {
+            _context = context;
+            _facade = facade;
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TblTicketEntradum>>> Get()
@@ -44,103 +53,27 @@ namespace EasyPark.Backend.Controllers
             return ticket is null ? NotFound() : ticket;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<TblTicketEntradum>> Post(TblTicketEntradum ticket)
+        [HttpPost("registrar-entrada")]
+        public async Task<ActionResult<TblTicketEntradum>> RegistrarEntrada([FromBody] RegistrarEntradaRequest request)
         {
-            _context.TblTicketEntrada.Add(ticket);
-
-            var bahia = await _context.TblBahia.FindAsync(ticket.IdBahia);
-            if (bahia != null)
-            {
-                bahia.Estado = "Ocupada";
-                _context.TblBahia.Update(bahia);
-            }
-
-            await _context.SaveChangesAsync();
+            var ticket = await _facade.RegistrarEntradaAsync(request);
             return CreatedAtAction(nameof(Get), new { id = ticket.IdTicket }, ticket);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, TblTicketEntradum ticket)
-        {
-            if (id != ticket.IdTicket) return BadRequest();
-            _context.Entry(ticket).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var ticket = await _context.TblTicketEntrada.FindAsync(id);
-            if (ticket is null) return NotFound();
-
-            _context.TblTicketEntrada.Remove(ticket);
-            await _context.SaveChangesAsync();
-            return NoContent();
         }
 
         [HttpPost("registrar-salida/{idTicket}")]
         public async Task<ActionResult<FacturaDTO>> RegistrarSalida(int idTicket)
         {
-            var ticket = await _context.TblTicketEntrada
-                .Include(t => t.PlacaNavigation)
-                .FirstOrDefaultAsync(t => t.IdTicket == idTicket);
-
-            if (ticket == null)
-                return NotFound("El ticket no fue encontrado.");
-
-            var bahia = await _context.TblBahia.FindAsync(ticket.IdBahia);
-            if (bahia == null)
-                return NotFound("La bahía asociada al ticket no fue encontrada.");
-
-            var tarifa = await _context.TblTarifas
-                .FirstOrDefaultAsync(t => t.IdTipoVehiculo == ticket.PlacaNavigation.IdTipoVehiculo);
-            if (tarifa == null)
-                return NotFound("No se encontró una tarifa para este tipo de vehículo.");
-
             var empleadoNombre = User.FindFirst(ClaimTypes.Name)?.Value;
             var usuario = await _context.TblUsuarios
                 .Include(u => u.IdEmpleadoNavigation)
                 .FirstOrDefaultAsync(u => u.Nombre == empleadoNombre);
 
-            if (usuario == null)
-                return Unauthorized("No se pudo identificar al empleado.");
+            if (usuario == null) return Unauthorized("No se pudo identificar al empleado.");
 
-            var idEmpleado = usuario.IdEmpleado;
-
-            var tiempoEstacionado = DateTime.Now - ticket.FechaHoraEntrada;
-            var horasACobrar = (decimal)Math.Ceiling(tiempoEstacionado.TotalHours);
-            var monto = horasACobrar * tarifa.ValorHora;
-
-            var nuevaFactura = new TblFactura
-            {
-                FechaHoraSalida = DateTime.Now,
-                Monto = monto,
-                IdTicket = ticket.IdTicket,
-                IdEmpleado = idEmpleado,
-                IdTarifa = tarifa.IdTarifa,
-                Estado = "Pagada"
-            };
-
-            bahia.Estado = "Disponible";
-            _context.TblFacturas.Add(nuevaFactura);
-            _context.TblBahia.Update(bahia);
-            await _context.SaveChangesAsync();
-
-            var facturaDTO = new FacturaDTO
-            {
-                IdFactura = nuevaFactura.IdFactura,
-                FechaHoraSalida = nuevaFactura.FechaHoraSalida,
-                Monto = nuevaFactura.Monto,
-                IdTicket = ticket.IdTicket,
-                Placa = ticket.Placa,
-                FechaHoraEntrada = ticket.FechaHoraEntrada,
-                Cliente = "Consumidor Final",
-                Documento = "222222222222"
-            };
-
+            var facturaDTO = await _facade.RegistrarSalidaAsync(idTicket, usuario.IdEmpleado);
             return Ok(facturaDTO);
         }
+
+
     }
 }

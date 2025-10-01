@@ -1,7 +1,4 @@
-﻿@using System.ComponentModel.DataAnnotations
-@using MudBlazor
-@inject HttpClient Http
-
+﻿
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
@@ -61,7 +58,7 @@
 </MudDialog>
 
 <div id="ticket" style="display:none;">
-    <h3 style="text-align:center;">🎫 EasyPark</h3>
+    <h3 style="text-align:center;">EasyPark</h3>
     <p><b>Placa:</b> @Model.Placa</p>
     <p><b>Tipo vehículo:</b> @_tiposVehiculo?.FirstOrDefault(t => t.IdTipoVehiculo == Model.IdTipoVehiculo)?.Nombre</p>
     <p><b>Bahía:</b> @_allAvailableBahias?.FirstOrDefault(b => b.IdBahia == Model.IdBahia)?.Ubicacion</p>
@@ -85,7 +82,8 @@
         try
         {
             _tiposVehiculo = await Http.GetFromJsonAsync<List<TblTipoVehiculo>>("api/TipoVehiculos");
-            _allAvailableBahias = await Http.GetFromJsonAsync<List<TblBahium>>("api/Bahias/disponibles");
+            _allAvailableBahias =
+                await Http.GetFromJsonAsync<List<TblBahium>>("api/Bahias/bahias-disponibles");
         }
         catch (Exception ex)
         {

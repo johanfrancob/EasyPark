@@ -5,12 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
+using EasyPark.Backend.Repositories;
+using EasyPark.Backend.Services;
+using EasyPark.Backend.Services.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ==========================
-// 1. Servicios
-// ==========================
+
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     // Esta opción le dice al serializador que ignore los bucles en lugar de fallar.
@@ -51,6 +52,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 builder.Services.AddAuthorization();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<ITarifaStrategy, TarifaPorHoraStrategy>();
+builder.Services.AddScoped<IBillingService, BillingService>();
+builder.Services.AddScoped<IBahiasService, BahiasService>();
+builder.Services.AddScoped<IParkingFacade, ParkingFacade>();
+
 
 // ==========================
 // 3. Configuración de CORS
