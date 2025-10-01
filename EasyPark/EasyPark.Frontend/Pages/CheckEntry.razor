@@ -3,7 +3,6 @@
 @page "/consultar-ingresos"
 @attribute [Authorize]
 
-
 <PageTitle>Consultar Ingresos</PageTitle>
 
 <div style="
@@ -19,10 +18,10 @@
 
         <div class="d-flex align-center mb-6">
             <MudIcon Icon="@LocalAtm" Color="Color.Primary" Size="Size.Large" Class="me-2" />
-            <MudText Typo="Typo.h4" Color="Color.Primary">Consulta de Ingresos - Parqueadero</MudText>
+            <MudText Typo="Typo.h4" Style="color: #00C9FF;">Consulta de Ingresos - Parqueadero</MudText> 
         </div>
 
-        <MudText Typo="Typo.subtitle1" Class="mb-6" Color="Color.Secondary">
+        <MudText Typo="Typo.subtitle1" Class="mb-6" Style="color: #011E30;">
             Seleccione un rango de fechas para ver los ingresos registrados en el sistema del parqueadero.
         </MudText>
 
@@ -40,10 +39,15 @@
                               AdornmentIcon="@CalendarToday" />
             </MudItem>
             <MudItem xs="12" sm="4" Class="d-flex align-center">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Search" Class="me-2">
+                <MudButton Variant="Variant.Filled"
+                           StartIcon="@Search"
+                           Class="me-2"
+                           Style="background-color: #00C9FF; color: white;">
                     Consultar
                 </MudButton>
-                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Download">
+                <MudButton Variant="Variant.Outlined"
+                           StartIcon="@Download"
+                           Style="color: #011E30; border-color: #011E30;">
                     Exportar CSV
                 </MudButton>
             </MudItem>
@@ -106,3 +110,4 @@
         </div>
     </MudPaper>
 </div>
+
